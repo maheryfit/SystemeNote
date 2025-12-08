@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using SystemeNote.Models;
 
 namespace SystemeNote.Data
 {
@@ -8,6 +9,6 @@ namespace SystemeNote.Data
         {
         }
         // Define your DbSets here, for example:
-        // public DbSet<YourEntity> YourEntities { get; set; }
+        public DbSet<Diplome> Diplomes { get; set; }
     }
 }
