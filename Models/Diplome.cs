@@ -13,6 +13,10 @@ namespace SystemeNote.Models
         public int Id { get; set; }
 
         [Required]
-        public required string NomDiplome { get; set; }
+        public required string NomDiplome { get; set; } 
+
+        public Diplome()
+        {
+        }
     }
 }

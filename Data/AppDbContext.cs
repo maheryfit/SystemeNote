@@ -10,5 +10,6 @@ namespace SystemeNote.Data
         }
         // Define your DbSets here, for example:
         public DbSet<Diplome> Diplomes { get; set; }
+        public DbSet<Promotion> Promotions { get; set; }
     }
 }

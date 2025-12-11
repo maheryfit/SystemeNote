@@ -1,26 +1,32 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
 
 namespace SystemeNote.Controllers
 {
-    public class DiplomesController : Controller
+    public class PromotionsController : Controller
     {
         private readonly AppDbContext _context;
 
-        public DiplomesController(AppDbContext context)
+        public PromotionsController(AppDbContext context)
         {
             _context = context;
         }
 
-        // GET: Diplomes
+        // GET: Promotions
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Diplomes.ToListAsync());
+            var appDbContext = _context.Promotions.Include(p => p.Diplome);
+            return View(await appDbContext.ToListAsync());
         }
 
-        // GET: Diplomes/Details/5
+        // GET: Promotions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null)
@@ -28,39 +34,42 @@ namespace SystemeNote.Controllers
                 return NotFound();
             }
 
-            var diplome = await _context.Diplomes
+            var promotion = await _context.Promotions
+                .Include(p => p.Diplome)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (diplome == null)
+            if (promotion == null)
             {
                 return NotFound();
             }
 
-            return View(diplome);
+            return View(promotion);
         }
 
-        // GET: Diplomes/Create
+        // GET: Promotions/Create
         public IActionResult Create()
         {
+            ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome");
             return View();
         }
 
-        // POST: Diplomes/Create
+        // POST: Promotions/Create
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NomDiplome")] Diplome diplome)
+        public async Task<IActionResult> Create([Bind("Id,NomPromotion,DateCreation,CodePromotion,DiplomeId")] Promotion promotion)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(diplome);
+                _context.Add(promotion);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(diplome);
+            ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome", promotion.DiplomeId);
+            return View(promotion);
         }
 
-        // GET: Diplomes/Edit/5
+        // GET: Promotions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -68,22 +77,23 @@ namespace SystemeNote.Controllers
                 return NotFound();
             }
 
-            var diplome = await _context.Diplomes.FindAsync(id);
-            if (diplome == null)
+            var promotion = await _context.Promotions.FindAsync(id);
+            if (promotion == null)
             {
                 return NotFound();
             }
-            return View(diplome);
+            ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome", promotion.DiplomeId);
+            return View(promotion);
         }
 
-        // POST: Diplomes/Edit/5
+        // POST: Promotions/Edit/5
         // To protect from overposting attacks, enable the specific properties you want to bind to.
         // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NomDiplome")] Diplome diplome)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,NomPromotion,DateCreation,CodePromotion,DiplomeId")] Promotion promotion)
         {
-            if (id != diplome.Id)
+            if (id != promotion.Id)
             {
                 return NotFound();
             }
@@ -92,12 +102,12 @@ namespace SystemeNote.Controllers
             {
                 try
                 {
-                    _context.Update(diplome);
+                    _context.Update(promotion);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!DiplomeExists(diplome.Id))
+                    if (!PromotionExists(promotion.Id))
                     {
                         return NotFound();
                     }
@@ -108,10 +118,11 @@ namespace SystemeNote.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(diplome);
+            ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome", promotion.DiplomeId);
+            return View(promotion);
         }
 
-        // GET: Diplomes/Delete/5
+        // GET: Promotions/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null)
@@ -119,34 +130,35 @@ namespace SystemeNote.Controllers
                 return NotFound();
             }
 
-            var diplome = await _context.Diplomes
+            var promotion = await _context.Promotions
+                .Include(p => p.Diplome)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (diplome == null)
+            if (promotion == null)
             {
                 return NotFound();
             }
 
-            return View(diplome);
+            return View(promotion);
         }
 
-        // POST: Diplomes/Delete/5
+        // POST: Promotions/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var diplome = await _context.Diplomes.FindAsync(id);
-            if (diplome != null)
+            var promotion = await _context.Promotions.FindAsync(id);
+            if (promotion != null)
             {
-                _context.Diplomes.Remove(diplome);
+                _context.Promotions.Remove(promotion);
             }
 
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool DiplomeExists(int id)
+        private bool PromotionExists(int id)
         {
-            return _context.Diplomes.Any(e => e.Id == id);
+            return _context.Promotions.Any(e => e.Id == id);
         }
     }
 }
