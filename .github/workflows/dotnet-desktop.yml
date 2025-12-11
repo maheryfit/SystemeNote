@@ -78,3 +78,7 @@ jobs:
     - name: Execute unit tests
       run: dotnet test
 
+    # Execute the projects
+    - name: Execute the projects
+      run: dotnet run
+
