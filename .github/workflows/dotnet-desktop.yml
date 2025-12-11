@@ -56,7 +56,9 @@ jobs:
                              # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
 
     env:
-      Solution_Name: SystemeNote                         # Replace with your solution name, i.e. MyWpfApp.sln.
+      Solution_Name: SystemeNote                         # Replace with your solution name, i.e. MyWpfApp.sln.      
+      Project_Path: SystemeNote.ConsoleApp/SystemeNote.ConsoleApp.csproj
+
 
     steps:
     - name: Checkout
@@ -72,13 +74,15 @@ jobs:
 
     # Add build
     - name: Build
-      run: dotnet build
+      run: dotnet build "$Solution_Name" --configuration ${{ matrix.configuration }} --no-restore
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
       run: dotnet test
 
-    # Execute the projects
-    - name: Execute the projects
-      run: dotnet run
+    # Run console app
+    - name: Execute (run console app)
+      run: dotnet run --project "$Project_Path" --configuration ${{ matrix.configuration }} --no-build
+
+  
 
