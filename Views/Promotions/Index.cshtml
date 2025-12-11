@@ -40,7 +40,10 @@
                 @Html.DisplayFor(modelItem => item.CodePromotion)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.Diplome.NomDiplome)
+                @if (item.Diplome != null)
+                {
+                    @Html.DisplayFor(modelItem => item.Diplome.NomDiplome)
+                }
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
