@@ -74,7 +74,7 @@ jobs:
 
     # Add build
     - name: Build
-      run: dotnet build "$Solution_Name" --configuration ${{ matrix.configuration }} --no-restore
+      run: dotnet build 
 
     # Execute all unit tests in the solution
     - name: Execute unit tests
@@ -82,7 +82,7 @@ jobs:
 
     # Run console app
     - name: Execute (run console app)
-      run: dotnet run --project "$Project_Path" --configuration ${{ matrix.configuration }} --no-build
+      run: dotnet run --configuration ${{ matrix.configuration }} --no-build
 
   
 
