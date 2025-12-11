@@ -47,9 +47,6 @@ jobs:
       - name: Test
         run: dotnet test "$SOLUTION_FILE" --configuration ${{ matrix.configuration }} --no-build --verbosity normal
 
-      # Optional: publish a specific runnable project (replace with your path)
-      - name: Publish (sample web/api project)
-        run: dotnet publish src/Api/Api.csproj -c ${{ matrix.configuration }} -o ./publish
 
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
