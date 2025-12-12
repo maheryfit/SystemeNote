@@ -1,0 +1,55 @@
+
+name: .NET Build & Test (Ubuntu)
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    env:
+      SOLUTION_FILE: SystemeNote.sln  # change if your solution file is different
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0.x"
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ matrix.configuration }}-${{ hashFiles('**/*.sln', '**/packages.lock.json') }}
+          restore-keys: |
+            nuget-${{ runner.os }}-${{ matrix.configuration }}-
+            nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore "$SOLUTION_FILE"
+
+      - name: Build
+        run: dotnet build "$SOLUTION_FILE" --configuration ${{ matrix.configuration }} --no-restore
+
+      - name: Test
+        run: dotnet test "$SOLUTION_FILE" --configuration ${{ matrix.configuration }} --no-build --verbosity normal
+
+
+      - name: Upload publish artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: SystemeNote-${{ matrix.configuration }}
+          path: ./publish
