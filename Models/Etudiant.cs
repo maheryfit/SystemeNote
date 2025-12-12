@@ -1,0 +1,78 @@
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace SystemeNote.Models
+{
+
+    [Table("etudiant")]
+    public class Etudiant
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int Id { get; set; }
+
+        [Required]
+        [StringLength(15)]
+        [Column("matricule")]
+        public required string Matricule { get; set; }
+
+        [Required]
+        [StringLength(30)]
+        [Column("nom")]
+        public required string Nom { get; set; }
+
+        [Required]
+        [StringLength(50)]
+        [Column("prenom")]
+        public required string Prenom { get; set; }
+
+        [Required]
+        [Column("date_naissance")]
+        [DataType(DataType.Date)]
+        public DateTime DateNaissance { get; set; }
+
+        [Required]
+        [Column("promotion_id")]
+        public int PromotionId { get; set; }
+
+        [Required]
+        [Column("genre")]
+        public int Genre { get; set; }
+
+        [Required]
+        [Column("is_actif")]
+        public bool IsActif { get; set; }
+
+        [Required]
+        [Column("date_admission")]
+        [DataType(DataType.Date)]
+        public DateTime DateAdmission { get; set; }
+
+        [Required]
+        [Column("administrateur_id")]
+        public int AdministrateurId { get; set; }
+
+        [Required]
+        [Column("planif_semestre_id")]
+        public int PlanifSemestreId { get; set; }
+
+        [Required]
+        [StringLength(255)]
+        [Column("mot_de_passe")]
+        [DataType(DataType.Password)]
+        public required string MotDePasse { get; set; }
+
+        [ForeignKey("PromotionId")]
+        public virtual required Promotion Promotion { get; set; }
+
+        [ForeignKey("AdministrateurId")]
+        public virtual required Administrateur Administrateur { get; set; }
+
+        [ForeignKey("PlanifSemestreId")]
+        public virtual required PlanifSemestre PlanifSemestre { get; set; }
+
+        public required ICollection<NoteEtudiant> NoteEtudiants { get; set; }
+        public required ICollection<HistoriqueSemestreEtudiant> HistoriqueSemestreEtudiants { get; set; }
+    }
+
+}
