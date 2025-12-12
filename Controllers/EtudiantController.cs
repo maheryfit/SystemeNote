@@ -1,6 +1,4 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -21,8 +19,8 @@ namespace SystemeNote.Controllers
         // GET: Etudiant
         public async Task<IActionResult> Index()
         {
-            var appDbContext = _context.Etudiants.Include(e => e.Administrateur).Include(e => e.Promotion).Include(e => e.PlanifSemestre);
-            return View(await appDbContext.ToListAsync());
+            // var appDbContext = _context.Etudiants.Include(e => e.Administrateur).Include(e => e.Promotion).Include(e => e.PlanifSemestre);
+            return View(await _context.Etudiants.ToListAsync());
         }
 
         // GET: Etudiant/Details/5

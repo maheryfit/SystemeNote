@@ -24,5 +24,34 @@ namespace SystemeNote.Data
         public DbSet<UniteEnseignement> UniteEnseignements { get; set; }
         public DbSet<Config> Configs { get; set; }
 
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Etudiant>()
+                .HasOne(e => e.PlanifSemestre)
+                .WithMany(p => p.Etudiants)
+                .HasForeignKey(e => e.PlanifSemestreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<Etudiant>()
+                .HasOne(e => e.Administrateur)
+                .WithMany(a => a.Etudiants)
+                .HasForeignKey(e => e.AdministrateurId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<HistoriqueSemestreEtudiant>()
+                .HasOne(h => h.PlanifSemestre)
+                .WithMany(p => p.HistoriqueSemestreEtudiants)
+                .HasForeignKey(h => h.PlanifSemetreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<HistoriqueSemestreEtudiant>()
+                .HasOne(h => h.Etudiant)
+                .WithMany(e => e.HistoriqueSemestreEtudiants)
+                .HasForeignKey(h => h.EtudiantId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
+
     }
 }
