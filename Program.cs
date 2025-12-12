@@ -6,7 +6,11 @@ var builder = WebApplication.CreateBuilder(args);
 var conn = builder.Configuration.GetConnectionString("DefaultConnection")
            ?? builder.Configuration["ConnectionStrings:DefaultConnection"];
 
-builder.Services.AddDbContext<AppDbContext>(opt => opt.UseSqlServer(conn));
+builder.Services.AddDbContext<AppDbContext>(opt =>
+    opt.UseSqlServer(conn, sqlOptions =>
+        sqlOptions.EnableRetryOnFailure()
+    )
+);
 
 // Add services to the container.
 builder.Services.AddRazorPages();
