@@ -1,6 +1,55 @@
+@model IEnumerable<SystemeNote.Models.Etudiant>
+
 @{
-    ViewData["Title"] = "Etudiants";
+    ViewData["Title"] = "Student List";
 }
-<h1>Etudiants</h1>
-<p><a asp-action="Create">Create New</a></p>
-<p>Placeholder list for `Etudiant`.</p>
+
+<h1>@ViewData["Title"]</h1>
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+    <a asp-controller="Upload" asp-action="Index" class="btn btn-secondary">Import Students</a>
+</p>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.Nom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Prenom)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Matricule)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Promotion)
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Nom)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Prenom)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Matricule)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Promotion.NomPromotion)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

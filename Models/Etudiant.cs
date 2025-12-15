@@ -34,6 +34,8 @@ namespace SystemeNote.Models
         [Required]
         [Column("promotion_id")]
         public int PromotionId { get; set; }
+        [ForeignKey("PromotionId")]
+        public virtual required Promotion Promotion { get; set; }
 
         [Required]
         [Column("genre")]
@@ -41,7 +43,7 @@ namespace SystemeNote.Models
 
         [Required]
         [Column("is_actif")]
-        public bool IsActif { get; set; }
+        public bool IsActif { get; set; } = false;
 
         [Required]
         [Column("date_admission")]
@@ -50,11 +52,17 @@ namespace SystemeNote.Models
 
         [Required]
         [Column("administrateur_id")]
-        public int AdministrateurId { get; set; }
+        public int  AdministrateurId { get; set; }
+
+
+        [ForeignKey("AdministrateurId")]
+        public virtual required Administrateur Administrateur { get; set; }
 
         [Required]
         [Column("planif_semestre_id")]
         public int PlanifSemestreId { get; set; }
+        [ForeignKey("PlanifSemestreId")]
+        public virtual required PlanifSemestre PlanifSemestre { get; set; }
 
         [Required]
         [StringLength(255)]
@@ -62,14 +70,9 @@ namespace SystemeNote.Models
         [DataType(DataType.Password)]
         public required string MotDePasse { get; set; }
 
-        [ForeignKey("PromotionId")]
-        public virtual required Promotion Promotion { get; set; }
 
-        [ForeignKey("AdministrateurId")]
-        public virtual required Administrateur Administrateur { get; set; }
 
-        [ForeignKey("PlanifSemestreId")]
-        public virtual required PlanifSemestre PlanifSemestre { get; set; }
+
 
         public required ICollection<NoteEtudiant> NoteEtudiants { get; set; }
         public required ICollection<HistoriqueSemestreEtudiant> HistoriqueSemestreEtudiants { get; set; }

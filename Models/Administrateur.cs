@@ -19,7 +19,7 @@ namespace SystemeNote.Models
         [Column("prenom_admin")]
         public required string PrenomAdmin { get; set; }
 
-        public required ICollection<Etudiant> Etudiants { get; set; }
+        public ICollection<Etudiant> Etudiants { get; set; }=new List<Etudiant>();
     }
 
 }

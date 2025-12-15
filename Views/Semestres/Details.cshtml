@@ -1,9 +1,24 @@
+@model SystemeNote.Models.Semestre
+
 @{
-    ViewData["Title"] = "Semestre Details";
+    ViewData["Title"] = "Details";
 }
-<h1>Semestre Details</h1>
-<p>Details view placeholder for `Semestre`.</p>
-<p>
-    <a asp-action="Edit">Edit</a> |
+
+<h1>Details</h1>
+
+<div>
+    <h4>Semestre</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.NomSemestre)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.NomSemestre)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
-</p>
+</div>

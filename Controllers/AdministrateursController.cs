@@ -22,7 +22,14 @@ namespace SystemeNote.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,NomAdmin,PrenomAdmin")] Administrateur admin)
         {
-            if (ModelState.IsValid) { _context.Add(admin); await _context.SaveChangesAsync(); return RedirectToAction(nameof(Index)); }
+            if (ModelState.IsValid)
+            {
+                
+                _context.Add(admin);
+                await _context.SaveChangesAsync();
+                return RedirectToAction(nameof(Index));
+            }
+            
             return View(admin);
         }
 

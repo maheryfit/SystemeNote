@@ -51,7 +51,70 @@ namespace SystemeNote.Data
                 .WithMany(e => e.HistoriqueSemestreEtudiants)
                 .HasForeignKey(h => h.EtudiantId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Ensure other relationships use Restrict to avoid multiple cascade paths on SQL Server
+            modelBuilder.Entity<NoteEtudiant>()
+                .HasOne(n => n.Etudiant)
+                .WithMany(e => e.NoteEtudiants)
+                .HasForeignKey(n => n.EtudiantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<NoteEtudiant>()
+                .HasOne(n => n.ParcoursEtude)
+                .WithMany(p => p.NoteEtudiants)
+                .HasForeignKey(n => n.ParcoursEtudiantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<NoteEtudiant>()
+                .HasOne(n => n.Promotion)
+                .WithMany()
+                .HasForeignKey(n => n.PromotionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ParcoursEtude>()
+                .HasOne(p => p.Matiere)
+                .WithMany(m => m.ParcoursEtudes)
+                .HasForeignKey(p => p.MatiereId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ParcoursEtude>()
+                .HasOne(p => p.UniteEnseignement)
+                .WithMany(u => u.ParcoursEtudes)
+                .HasForeignKey(p => p.UniteEnseignementId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<ParcoursEtude>()
+                .HasOne(p => p.PlanifSemestre)
+                .WithMany(ps => ps.ParcoursEtudes)
+                .HasForeignKey(p => p.PlanifSemestreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlanifSemestre>()
+                .HasOne(p => p.Semestre)
+                .WithMany(s => s.PlanifSemestres)
+                .HasForeignKey(p => p.SemestreId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlanifSemestre>()
+                .HasOne(p => p.OptionEtude)
+                .WithMany(o => o.PlanifSemestres)
+                .HasForeignKey(p => p.OptionEtudeId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<PlanifSemestre>()
+                .HasOne(p => p.Promotion)
+                .WithMany()
+                .HasForeignKey(p => p.PromotionId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+
+            modelBuilder.Entity<NoteEtudiant>()
+                .HasOne(n => n.ParcoursEtude)
+                .WithMany(p => p.NoteEtudiants)
+                .HasForeignKey(n => n.ParcoursEtudiantId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
+
 
     }
 }

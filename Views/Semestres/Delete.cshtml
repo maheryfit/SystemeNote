@@ -1,9 +1,27 @@
+@model SystemeNote.Models.Semestre
+
 @{
-    ViewData["Title"] = "Delete Semestre";
+    ViewData["Title"] = "Delete";
 }
-<h1>Delete Semestre</h1>
-<form asp-action="Delete" method="post">
-    <!-- Confirm deletion for `Semestre` -->
-    <button type="submit">Delete</button>
-    <a asp-action="Index">Cancel</a>
-</form>
+
+<h1>Delete</h1>
+
+<h3>Are you sure you want to delete this?</h3>
+<div>
+    <h4>Semestre</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.NomSemestre)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.NomSemestre)
+        </dd>
+    </dl>
+
+    <form asp-action="Delete">
+        <input type="hidden" asp-for="Id" />
+        <input type="submit" value="Delete" class="btn btn-danger" /> |
+        <a asp-action="Index">Back to List</a>
+    </form>
+</div>

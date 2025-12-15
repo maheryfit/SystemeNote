@@ -1,9 +1,33 @@
+@model SystemeNote.Models.Administrateur
+
 @{
-    ViewData["Title"] = "Create Administrateur";
+    ViewData["Title"] = "Create Administrator";
 }
-<h1>Create Administrateur</h1>
-<form asp-action="Create" method="post">
-    <!-- Fields for Administrateur -->
-    <button type="submit">Create</button>
-    <a asp-action="Index">Cancel</a>
-</form>
+
+<h4>@ViewData["Title"]</h4>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group mb-3">
+                <label asp-for="NomAdmin" class="control-label"></label>
+                <input asp-for="NomAdmin" class="form-control" />
+                <span asp-validation-for="NomAdmin" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="PrenomAdmin" class="control-label"></label>
+                <input asp-for="PrenomAdmin" class="form-control" />
+                <span asp-validation-for="PrenomAdmin" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

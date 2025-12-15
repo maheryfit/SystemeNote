@@ -1,9 +1,29 @@
+@model SystemeNote.Models.Semestre
+
 @{
-    ViewData["Title"] = "Create Semestre";
+    ViewData["Title"] = "Create";
 }
-<h1>Create Semestre</h1>
-<form asp-action="Create" method="post">
-    <!-- Add form fields for `Semestre` here -->
-    <button type="submit">Create</button>
-    <a asp-action="Index">Cancel</a>
-</form>
+
+<h1>Create</h1>
+
+<h4>Semestre</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div class="form-group">
+                <label asp-for="NomSemestre" class="control-label"></label>
+                <input asp-for="NomSemestre" class="form-control" />
+                <span asp-validation-for="NomSemestre" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>
