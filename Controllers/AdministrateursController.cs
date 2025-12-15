@@ -1,13 +1,7 @@
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
-using System.IO;
-using SystemeNote.Utils;
-using System;
-using System.Text;
 
 namespace SystemeNote.Controllers
 {
@@ -56,7 +50,3 @@ namespace SystemeNote.Controllers
     }
 }
 
-namespace SystemeNote.Controllers
-{
-    // La classe partielle contenant la logique d'upload a été supprimée.
-}

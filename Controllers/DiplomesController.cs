@@ -1,7 +1,3 @@
-using System;
-using System.IO;
-using System.Linq;
-using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
