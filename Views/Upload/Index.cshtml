@@ -1,36 +1,23 @@
 @{
-    ViewData["Title"] = "Import Students";
+    ViewData["Title"] = "Import Data";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<h4>Upload a CSV file to import new students.</h4>
+<h4>Select a data type to import via CSV file.</h4>
 <hr />
-<div class="row">
-    <div class="col-md-6">
-        <form asp-controller="Upload" asp-action="UploadFile" method="post" enctype="multipart/form-data">
-            <div class="form-group mb-3">
-                <label for="promotionId" class="control-label">Promotion</label>
-                <select name="promotionId" class="form-control" asp-items="ViewBag.PromotionId"></select>
-            </div>
-            <div class="form-group mb-3">
-                <label for="planifSemestreId" class="control-label">Semester Plan</label>
-                <select name="planifSemestreId" class="form-control" asp-items="ViewBag.PlanifSemestreId"></select>
-            </div>
-            <div class="form-group mb-3">
-                <label for="file" class="control-label">CSV File</label>
-                <input name="file" type="file" class="form-control" />
-            </div>
-            <div class="form-group">
-                <input type="submit" value="Upload" class="btn btn-primary" />
-            </div>
-        </form>
-    </div>
+
+<div class="list-group">
+    <a asp-action="UploadStudents" class="list-group-item list-group-item-action">Import Students</a>
+    <a asp-action="UploadDiplomes" class="list-group-item list-group-item-action">Import Diplomas</a>
+    <a asp-action="UploadPromotions" class="list-group-item list-group-item-action">Import Promotions</a>
+    <a asp-action="UploadMatieres" class="list-group-item list-group-item-action">Import Subjects (Matières)</a>
+    <a asp-action="UploadConfigs" class="list-group-item list-group-item-action">Import Configurations</a>
 </div>
 
 @if (ViewBag.Message != null)
 {
     <div class="alert alert-info mt-3" role="alert">
-        @ViewBag.Message
+        <p>@ViewBag.Message</p>
     </div>
 }

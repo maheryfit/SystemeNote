@@ -1,0 +1,22 @@
+@{
+    ViewData["Title"] = "Importer des Diplômes";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Télécharger un fichier CSV avec une colonne : <strong>NomDiplome</strong></h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Upload" method="post" enctype="multipart/form-data">
+            <div class="form-group mb-3">
+                <label for="file" class="control-label">Fichier CSV</label>
+                <input name="file" type="file" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Importer" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Retour à la liste</a>
+            </div>
+        </form>
+    </div>
+</div>

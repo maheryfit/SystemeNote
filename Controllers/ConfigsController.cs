@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
+using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
@@ -42,5 +43,34 @@ namespace SystemeNote.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id) { var item = await _context.Configs.FindAsync(id); if (item != null) _context.Configs.Remove(item); await _context.SaveChangesAsync(); return RedirectToAction(nameof(Index)); }
+
+
+        #region Configs
+
+        // POST: /Upload/UploadConfigs
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadConfigs(IFormFile file)
+        {
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 2) throw new Exception("CSV must have 2 columns: Description, Valeur");
+                var description = cols[0];
+                var valeur = cols[1];
+                if (string.IsNullOrWhiteSpace(valeur)) return;
+
+                // Assuming 'valeur' should be unique for simplicity. Adjust if needed.
+                var exists = await _context.Configs.AnyAsync(c => c.Valeur == valeur);
+                if (!exists)
+                {
+                    _context.Configs.Add(new Config { Description = description, Valeur = valeur });
+                }
+            });
+
+            TempData["Message"] = result;
+            return RedirectToAction(nameof(Index));
+        }
+        #endregion
+
     }
 }

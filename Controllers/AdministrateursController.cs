@@ -4,10 +4,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
+using System.IO;
+using SystemeNote.Utils;
+using System;
+using System.Text;
 
 namespace SystemeNote.Controllers
 {
-    public class AdministrateursController : Controller
+    public partial class AdministrateursController : Controller
     {
         private readonly AppDbContext _context;
         public AdministrateursController(AppDbContext context) { _context = context; }
@@ -24,12 +28,12 @@ namespace SystemeNote.Controllers
         {
             if (ModelState.IsValid)
             {
-                
+
                 _context.Add(admin);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            
+
             return View(admin);
         }
 
@@ -49,5 +53,41 @@ namespace SystemeNote.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id) { var item = await _context.Administrateurs.FindAsync(id); if (item != null) _context.Administrateurs.Remove(item); await _context.SaveChangesAsync(); return RedirectToAction(nameof(Index)); }
+    }
+}
+
+namespace SystemeNote.Controllers
+{
+    public partial class AdministrateursController : Controller
+    {
+        // GET: Administrateurs/Upload
+        public IActionResult Upload()
+        {
+            return View();
+        }
+
+        // POST: Administrateurs/Upload
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 2) throw new Exception("Le fichier CSV doit contenir 2 colonnes : NomAdmin, PrenomAdmin");
+                var nomAdmin = cols[0];
+                var prenomAdmin = cols[1];
+                if (string.IsNullOrWhiteSpace(nomAdmin) || string.IsNullOrWhiteSpace(prenomAdmin)) return;
+
+                // Optionnel : Vérifier si l'admin existe déjà pour éviter les doublons
+                var exists = await _context.Administrateurs.AnyAsync(a => a.NomAdmin == nomAdmin && a.PrenomAdmin == prenomAdmin);
+                if (!exists)
+                {
+                    _context.Administrateurs.Add(new Administrateur { NomAdmin = nomAdmin, PrenomAdmin = prenomAdmin });
+                }
+            });
+
+            TempData["Message"] = result;
+            return RedirectToAction(nameof(Index));
+        }
     }
 }

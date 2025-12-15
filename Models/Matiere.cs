@@ -1,8 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-using SystemeNote.Models;
 
-namespace SystemNote.Models
+namespace SystemeNote.Models
 {
     [Table("matiere")]
     public class Matiere
@@ -21,7 +20,7 @@ namespace SystemNote.Models
         [Column("code_matiere")]
         public required string CodeMatiere { get; set; }
 
-        public required ICollection<ParcoursEtude> ParcoursEtudes { get; set; }
+        public required ICollection<SystemeNote.Models.ParcoursEtude> ParcoursEtudes { get; set; }
 
     }
 

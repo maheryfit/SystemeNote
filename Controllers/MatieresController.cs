@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
 using SystemNote.Models;
+using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
@@ -43,5 +44,33 @@ namespace SystemeNote.Controllers
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id) { var item = await _context.Matieres.FindAsync(id); if (item != null) _context.Matieres.Remove(item); await _context.SaveChangesAsync(); return RedirectToAction(nameof(Index)); }
+    
+
+    
+        #region Matieres
+
+        // POST: /Upload/UploadMatieres
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadMatieres(IFormFile file)
+        {
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 2) throw new Exception("CSV must have 2 columns: NomMatiere, CodeMatiere");
+                var nomMatiere = cols[0];
+                var codeMatiere = cols[1];
+                if (string.IsNullOrWhiteSpace(nomMatiere) || string.IsNullOrWhiteSpace(codeMatiere)) return;
+
+                var exists = await _context.Matieres.AnyAsync(m => m.CodeMatiere == codeMatiere);
+                if (!exists)
+                {
+                    _context.Matieres.Add(new Matiere { NomMatiere = nomMatiere, CodeMatiere = codeMatiere, ParcoursEtudes = new List<ParcoursEtude>() });
+                }
+            });
+
+            TempData["Message"] = result;
+            return RedirectToAction(nameof(Index));
+        }
+        #endregion
     }
 }

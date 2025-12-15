@@ -1,12 +1,14 @@
 using System;
-using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
+using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
@@ -20,28 +22,27 @@ namespace SystemeNote.Controllers
         }
 
         // GET: Promotions
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchString)
         {
-            var appDbContext = _context.Promotions.Include(p => p.Diplome);
-            return View(await appDbContext.ToListAsync());
+            ViewData["CurrentFilter"] = searchString;
+            var promotions = from p in _context.Promotions.Include(p => p.Diplome)
+                             select p;
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                promotions = promotions.Where(s => s.NomPromotion.Contains(searchString)
+                                       || s.CodePromotion.Contains(searchString));
+            }
+            return View(await promotions.AsNoTracking().ToListAsync());
         }
 
         // GET: Promotions/Details/5
         public async Task<IActionResult> Details(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var promotion = await _context.Promotions
                 .Include(p => p.Diplome)
                 .FirstOrDefaultAsync(m => m.Id == id);
-            if (promotion == null)
-            {
-                return NotFound();
-            }
-
+            if (promotion == null) return NotFound();
             return View(promotion);
         }
 
@@ -53,8 +54,6 @@ namespace SystemeNote.Controllers
         }
 
         // POST: Promotions/Create
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,NomPromotion,DateCreation,CodePromotion,DiplomeId")] Promotion promotion)
@@ -72,32 +71,19 @@ namespace SystemeNote.Controllers
         // GET: Promotions/Edit/5
         public async Task<IActionResult> Edit(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
             var promotion = await _context.Promotions.FindAsync(id);
-            if (promotion == null)
-            {
-                return NotFound();
-            }
+            if (promotion == null) return NotFound();
             ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome", promotion.DiplomeId);
             return View(promotion);
         }
 
         // POST: Promotions/Edit/5
-        // To protect from overposting attacks, enable the specific properties you want to bind to.
-        // For more details, see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,NomPromotion,DateCreation,CodePromotion,DiplomeId")] Promotion promotion)
         {
-            if (id != promotion.Id)
-            {
-                return NotFound();
-            }
-
+            if (id != promotion.Id) return NotFound();
             if (ModelState.IsValid)
             {
                 try
@@ -107,14 +93,8 @@ namespace SystemeNote.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!PromotionExists(promotion.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    if (!_context.Promotions.Any(e => e.Id == promotion.Id)) return NotFound();
+                    else throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
@@ -125,19 +105,9 @@ namespace SystemeNote.Controllers
         // GET: Promotions/Delete/5
         public async Task<IActionResult> Delete(int? id)
         {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var promotion = await _context.Promotions
-                .Include(p => p.Diplome)
-                .FirstOrDefaultAsync(m => m.Id == id);
-            if (promotion == null)
-            {
-                return NotFound();
-            }
-
+            if (id == null) return NotFound();
+            var promotion = await _context.Promotions.Include(p => p.Diplome).FirstOrDefaultAsync(m => m.Id == id);
+            if (promotion == null) return NotFound();
             return View(promotion);
         }
 
@@ -147,18 +117,29 @@ namespace SystemeNote.Controllers
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
             var promotion = await _context.Promotions.FindAsync(id);
-            if (promotion != null)
-            {
-                _context.Promotions.Remove(promotion);
-            }
-
+            if (promotion != null) _context.Promotions.Remove(promotion);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool PromotionExists(int id)
+        // GET: Promotions/Upload
+        public IActionResult Upload() => View();
+
+        // POST: Promotions/Upload
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Upload(IFormFile file)
         {
-            return _context.Promotions.Any(e => e.Id == id);
+            var diplomeMap = await _context.Diplomes.ToDictionaryAsync(d => d.NomDiplome, d => d.Id, StringComparer.OrdinalIgnoreCase);
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 4) throw new Exception("CSV must have 4 columns: NomPromotion, DateCreation, CodePromotion, NomDiplome");
+                if (!diplomeMap.TryGetValue(cols[3], out var diplomeId)) throw new Exception($"Diploma '{cols[3]}' not found.");
+                var exists = await _context.Promotions.AnyAsync(p => p.CodePromotion == cols[2]);
+                if (!exists) _context.Promotions.Add(new Promotion { NomPromotion = cols[0], DateCreation = DateOnly.Parse(cols[1]), CodePromotion = cols[2], DiplomeId = diplomeId });
+            });
+            TempData["Message"] = result;
+            return RedirectToAction(nameof(Index));
         }
     }
 }

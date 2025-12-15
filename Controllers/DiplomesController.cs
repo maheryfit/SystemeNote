@@ -1,7 +1,12 @@
+using System;
+using System.IO;
+using System.Linq;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
+using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
@@ -18,10 +23,11 @@ namespace SystemeNote.Controllers
         // GET: Diplomes
         public async Task<IActionResult> Index()
         {
+            ViewData["Title"] = "Diplomes";
             return View(await _context.Diplomes.ToListAsync());
         }
 
-        
+
         // GET: Diplomes/Details/5
         public async Task<IActionResult> Details(int? id)
         {
@@ -150,5 +156,27 @@ namespace SystemeNote.Controllers
         {
             return _context.Diplomes.Any(e => e.Id == id);
         }
+        // POST: Diplomes/Upload
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Upload(IFormFile file)
+        {
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 1) throw new Exception("Le fichier CSV doit contenir 1 colonne : NomDiplome");
+                var nomDiplome = cols[0];
+                if (string.IsNullOrWhiteSpace(nomDiplome)) return;
+
+                var exists = await _context.Diplomes.AnyAsync(d => d.NomDiplome == nomDiplome);
+                if (!exists)
+                {
+                    _context.Diplomes.Add(new Diplome { NomDiplome = nomDiplome });
+                }
+            });
+
+            TempData["Message"] = result;
+            return RedirectToAction(nameof(Index));
+        }
     }
 }
+
