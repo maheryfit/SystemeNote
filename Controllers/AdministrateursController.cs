@@ -58,36 +58,5 @@ namespace SystemeNote.Controllers
 
 namespace SystemeNote.Controllers
 {
-    public partial class AdministrateursController : Controller
-    {
-        // GET: Administrateurs/Upload
-        public IActionResult Upload()
-        {
-            return View();
-        }
-
-        // POST: Administrateurs/Upload
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upload(IFormFile file)
-        {
-            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
-            {
-                if (cols.Length < 2) throw new Exception("Le fichier CSV doit contenir 2 colonnes : NomAdmin, PrenomAdmin");
-                var nomAdmin = cols[0];
-                var prenomAdmin = cols[1];
-                if (string.IsNullOrWhiteSpace(nomAdmin) || string.IsNullOrWhiteSpace(prenomAdmin)) return;
-
-                // Optionnel : Vérifier si l'admin existe déjà pour éviter les doublons
-                var exists = await _context.Administrateurs.AnyAsync(a => a.NomAdmin == nomAdmin && a.PrenomAdmin == prenomAdmin);
-                if (!exists)
-                {
-                    _context.Administrateurs.Add(new Administrateur { NomAdmin = nomAdmin, PrenomAdmin = prenomAdmin });
-                }
-            });
-
-            TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
-        }
-    }
+    // La classe partielle contenant la logique d'upload a été supprimée.
 }

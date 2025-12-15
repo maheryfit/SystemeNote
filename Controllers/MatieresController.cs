@@ -4,7 +4,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
-using SystemNote.Models;
 using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
@@ -52,7 +51,7 @@ namespace SystemeNote.Controllers
         // POST: /Upload/UploadMatieres
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadMatieres(IFormFile file)
+        public async Task<IActionResult> Upload(IFormFile file)
         {
             var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
             {

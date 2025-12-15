@@ -121,25 +121,5 @@ namespace SystemeNote.Controllers
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
-
-        // GET: Promotions/Upload
-        public IActionResult Upload() => View();
-
-        // POST: Promotions/Upload
-        [HttpPost]
-        [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Upload(IFormFile file)
-        {
-            var diplomeMap = await _context.Diplomes.ToDictionaryAsync(d => d.NomDiplome, d => d.Id, StringComparer.OrdinalIgnoreCase);
-            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
-            {
-                if (cols.Length < 4) throw new Exception("CSV must have 4 columns: NomPromotion, DateCreation, CodePromotion, NomDiplome");
-                if (!diplomeMap.TryGetValue(cols[3], out var diplomeId)) throw new Exception($"Diploma '{cols[3]}' not found.");
-                var exists = await _context.Promotions.AnyAsync(p => p.CodePromotion == cols[2]);
-                if (!exists) _context.Promotions.Add(new Promotion { NomPromotion = cols[0], DateCreation = DateOnly.Parse(cols[1]), CodePromotion = cols[2], DiplomeId = diplomeId });
-            });
-            TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
-        }
     }
 }

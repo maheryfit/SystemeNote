@@ -1,6 +1,5 @@
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Models;
-using SystemNote.Models;
 
 namespace SystemeNote.Data
 {
