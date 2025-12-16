@@ -13,11 +13,14 @@
     <a asp-action="UploadPromotions" class="list-group-item list-group-item-action">Import Promotions</a>
     <a asp-action="UploadMatieres" class="list-group-item list-group-item-action">Import Subjects (Matières)</a>
     <a asp-action="UploadConfigs" class="list-group-item list-group-item-action">Import Configurations</a>
+    <a asp-action="UploadSemestres" class="list-group-item list-group-item-action">Import Semesters</a>
+    <a asp-action="UploadAdministrateurs" class="list-group-item list-group-item-action">Import Administrators</a>
 </div>
 
-@if (ViewBag.Message != null)
+@if (TempData["Message"] != null)
 {
     <div class="alert alert-info mt-3" role="alert">
-        <p>@ViewBag.Message</p>
+        @* Html.Raw est utilisé pour que les balises HTML comme <br/> soient interprétées correctement *@
+        <p>@Html.Raw(TempData["Message"])</p>
     </div>
 }

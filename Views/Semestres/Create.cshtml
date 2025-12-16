@@ -1,10 +1,10 @@
 @model SystemeNote.Models.Semestre
 
 @{
-    ViewData["Title"] = "Create";
+    ViewData["Title"] = "Create Semester";
 }
 
-<h1>Create</h1>
+<h1>@ViewData["Title"]</h1>
 
 <h4>Semestre</h4>
 <hr />
@@ -12,10 +12,19 @@
     <div class="col-md-4">
         <form asp-action="Create">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
-            <div class="form-group">
+            <div class="form-group mb-3">
+                <label asp-for="CodeSemestre" class="control-label"></label>
+                <input asp-for="CodeSemestre" class="form-control" />
+                <span asp-validation-for="CodeSemestre" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
                 <label asp-for="NomSemestre" class="control-label"></label>
                 <input asp-for="NomSemestre" class="form-control" />
                 <span asp-validation-for="NomSemestre" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="DiplomeId" class="control-label"></label>
+                <select asp-for="DiplomeId" class="form-control" asp-items="ViewBag.DiplomeId"></select>
             </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />

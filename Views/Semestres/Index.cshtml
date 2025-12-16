@@ -1,19 +1,25 @@
 @model IEnumerable<SystemeNote.Models.Semestre>
 
 @{
-    ViewData["Title"] = "Semestres";
+    ViewData["Title"] = "Semesters";
 }
 
-<h1>Semestres</h1>
+<h1>@ViewData["Title"]</h1>
 
 <p>
-    <a asp-action="Create">Create New</a>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
 </p>
 <table class="table">
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.CodeSemestre)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.NomSemestre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Diplome)
             </th>
             <th></th>
         </tr>
@@ -23,7 +29,13 @@
         {
             <tr>
                 <td>
+                    @Html.DisplayFor(modelItem => item.CodeSemestre)
+                </td>
+                <td>
                     @Html.DisplayFor(modelItem => item.NomSemestre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Diplome.NomDiplome)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

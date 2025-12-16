@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Mvc.Rendering;
 using SystemeNote.Data;
 using SystemeNote.Models;
 
@@ -16,25 +17,29 @@ namespace SystemeNote.Controllers
 
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Semestres.ToListAsync());
+            var appDbContext = _context.Semestres.Include(s => s.Diplome);
+            return View(await appDbContext.ToListAsync());
         }
 
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
-            var semestre = await _context.Semestres.FirstOrDefaultAsync(m => m.Id == id);
+            var semestre = await _context.Semestres
+                .Include(s => s.Diplome)
+                .FirstOrDefaultAsync(m => m.Id == id);
             if (semestre == null) return NotFound();
             return View(semestre);
         }
 
         public IActionResult Create()
         {
+            ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome");
             return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NomSemestre")] Semestre semestre)
+        public async Task<IActionResult> Create([Bind("Id,CodeSemestre,NomSemestre,DiplomeId")] Semestre semestre)
         {
             if (ModelState.IsValid)
             {
@@ -42,6 +47,7 @@ namespace SystemeNote.Controllers
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+            ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome", semestre.DiplomeId);
             return View(semestre);
         }
 
@@ -50,12 +56,13 @@ namespace SystemeNote.Controllers
             if (id == null) return NotFound();
             var semestre = await _context.Semestres.FindAsync(id);
             if (semestre == null) return NotFound();
+            ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome", semestre.DiplomeId);
             return View(semestre);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NomSemestre")] Semestre semestre)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,CodeSemestre,NomSemestre,DiplomeId")] Semestre semestre)
         {
             if (id != semestre.Id) return NotFound();
             if (ModelState.IsValid)

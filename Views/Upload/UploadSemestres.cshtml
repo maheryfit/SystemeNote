@@ -1,0 +1,26 @@
+@{
+    ViewData["Title"] = "Import Semesters";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Upload a CSV file with columns: <strong>CodeSemestre, NomSemestre</strong></h4>
+<hr />
+<div class="row">
+    <div class="col-md-6">
+        <form asp-controller="Upload" asp-action="UploadSemestres" method="post" enctype="multipart/form-data">
+            <div class="form-group mb-3">
+                <label for="diplomeId" class="control-label">Diploma</label>
+                <select name="diplomeId" class="form-control" asp-items="ViewBag.DiplomeId"></select>
+            </div>
+            <div class="form-group mb-3">
+                <label for="file" class="control-label">CSV File</label>
+                <input name="file" type="file" class="form-control" required />
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Upload" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Back to Hub</a>
+            </div>
+        </form>
+    </div>
+</div>

@@ -19,13 +19,17 @@
                 <select name="planifSemestreId" class="form-control" asp-items="ViewBag.PlanifSemestreId"></select>
             </div>
             <div class="form-group mb-3">
-                <label for="file" class="control-label">CSV File</label>
-                <input name="file" type="file" class="form-control" required />
+                <label for="administrateurId" class="control-label">Administrator</label>
+                <select name="administrateurId" class="form-control" asp-items="ViewBag.AdministrateurId"></select>
             </div>
-            <div class="form-group">
-                <input type="submit" value="Upload" class="btn btn-primary" />
-                <a asp-action="Index" class="btn btn-secondary">Back to Hub</a>
-            </div>
-        </form>
+    <div class="form-group mb-3">
+        <label for="file" class="control-label">CSV File</label>
+        <input name="file" type="file" class="form-control" required />
     </div>
+    <div class="form-group">
+        <input type="submit" value="Upload" class="btn btn-primary" />
+        <a asp-action="Index" class="btn btn-secondary">Back to Hub</a>
+    </div>
+    </form>
+</div>
 </div>

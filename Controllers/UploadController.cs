@@ -28,6 +28,7 @@ namespace SystemeNote.Controllers
         public IActionResult UploadStudents()
         {
             ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion");
+            ViewData["AdminId0"] = new SelectList(_context.Administrateurs, "Id", "NomAdmin");
             ViewData["PlanifSemestreId"] = new SelectList(_context.PlanifSemestres, "Id", "NomPlanifSemestre");
             return View();
         }
@@ -35,7 +36,7 @@ namespace SystemeNote.Controllers
         // POST: /Upload/UploadStudents
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadStudents(IFormFile file, int promotionId,int adminId, int planifSemestreId)
+        public async Task<IActionResult> UploadStudents(IFormFile file, int promotionId, int adminId, int planifSemestreId)
         {
             var promotion = await _context.Promotions.FindAsync(promotionId);
             var admin = await _context.Administrateurs.FindAsync(adminId);
@@ -59,7 +60,7 @@ namespace SystemeNote.Controllers
                     Promotion = promotion!,
                     Administrateur = admin!,
                     PlanifSemestre = planifSemestre!,
-                    AdministrateurId = adminId, // TODO: Re-evaluate how to handle this
+                    AdministrateurId = adminId,
                     NoteEtudiants = new List<NoteEtudiant>(),
                     HistoriqueSemestreEtudiants = new List<HistoriqueSemestreEtudiant>()
                 };
@@ -168,6 +169,41 @@ namespace SystemeNote.Controllers
                 if (string.IsNullOrWhiteSpace(valeur)) return;
                 var exists = await _context.Configs.AnyAsync(c => c.Valeur == valeur);
                 if (!exists) _context.Configs.Add(new Config { Description = description, Valeur = valeur });
+            });
+            TempData["Message"] = result;
+            return RedirectToAction(nameof(Index));
+        }
+        #endregion
+
+        #region Semestres
+        public IActionResult UploadSemestres()
+        {
+            ViewData["DiplomeId"] = new SelectList(_context.Diplomes, "Id", "NomDiplome");
+            return View();
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadSemestres(IFormFile file, int diplomeId)
+        {
+            var diplome = await _context.Diplomes.FindAsync(diplomeId);
+            if (diplome == null)
+            {
+                TempData["Message"] = "Erreur : Le diplôme sélectionné n'existe pas.";
+                return RedirectToAction(nameof(Index));
+            }
+
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 2) throw new Exception("Le fichier CSV doit contenir 2 colonnes : CodeSemestre, NomSemestre");
+                var codeSemestre = cols[0];
+                var nomSemestre = cols[1];
+                if (string.IsNullOrWhiteSpace(codeSemestre) || string.IsNullOrWhiteSpace(nomSemestre)) return;
+                var exists = await _context.Semestres.AnyAsync(s => s.CodeSemestre == codeSemestre);
+                if (!exists)
+                {
+                    _context.Semestres.Add(new Semestre { CodeSemestre = codeSemestre, NomSemestre = nomSemestre, DiplomeId = diplomeId, Diplome = diplome, PlanifSemestres = new List<PlanifSemestre>() });
+                }
             });
             TempData["Message"] = result;
             return RedirectToAction(nameof(Index));
