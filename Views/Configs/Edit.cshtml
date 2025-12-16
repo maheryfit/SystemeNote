@@ -1,9 +1,18 @@
+@model SystemeNote.Models.Config
 @{
     ViewData["Title"] = "Edit Config";
 }
 <h1>Edit Config</h1>
 <form asp-action="Edit" method="post">
-    <!-- Editable fields for Config -->
+    <div class="form-group">
+        <label asp-for="Description" class="control-label"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
+    <div class="form-group">
+        <input type="hidden" asp-for="Id" />
+    </div>
+
     <button type="submit">Save</button>
     <a asp-action="Index">Cancel</a>
 </form>

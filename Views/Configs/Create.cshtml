@@ -1,9 +1,14 @@
+@model SystemeNote.Models.Config
 @{
     ViewData["Title"] = "Create Config";
 }
 <h1>Create Config</h1>
 <form asp-action="Create" method="post">
-    <!-- Fields for Config -->
+    <div class="form-group">
+        <label asp-for="Description" class="control-label"></label>
+        <input asp-for="Description" class="form-control" />
+        <span asp-validation-for="Description" class="text-danger"></span>
+    </div>
     <button type="submit">Create</button>
     <a asp-action="Index">Cancel</a>
 </form>

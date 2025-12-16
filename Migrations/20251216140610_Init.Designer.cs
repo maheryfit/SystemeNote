@@ -12,8 +12,8 @@ using SystemeNote.Data;
 namespace SystemeNote.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251212121630_CreateTables")]
-    partial class CreateTables
+    [Migration("20251216140610_Init")]
+    partial class Init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -24,31 +24,6 @@ namespace SystemeNote.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("SystemNote.Models.Matiere", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("CodeMatiere")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("code_matiere");
-
-                    b.Property<string>("NomMatiere")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)")
-                        .HasColumnName("nom_matiere");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("matiere");
-                });
 
             modelBuilder.Entity("SystemeNote.Models.Administrateur", b =>
                 {
@@ -221,6 +196,31 @@ namespace SystemeNote.Migrations
                     b.HasIndex("PlanifSemetreId");
 
                     b.ToTable("historique_semestre_etudiant");
+                });
+
+            modelBuilder.Entity("SystemeNote.Models.Matiere", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CodeMatiere")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("code_matiere");
+
+                    b.Property<string>("NomMatiere")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)")
+                        .HasColumnName("nom_matiere");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("matiere");
                 });
 
             modelBuilder.Entity("SystemeNote.Models.NoteEtudiant", b =>
@@ -396,7 +396,20 @@ namespace SystemeNote.Migrations
             modelBuilder.Entity("SystemeNote.Models.Semestre", b =>
                 {
                     b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("CodeSemestre")
+                        .IsRequired()
+                        .HasMaxLength(15)
+                        .HasColumnType("nvarchar(15)")
+                        .HasColumnName("code_semestre");
+
+                    b.Property<int>("DiplomeId")
+                        .HasColumnType("int")
+                        .HasColumnName("diplome_id");
 
                     b.Property<string>("NomSemestre")
                         .IsRequired()
@@ -405,6 +418,14 @@ namespace SystemeNote.Migrations
                         .HasColumnName("nom_semestre");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("CodeSemestre")
+                        .IsUnique();
+
+                    b.HasIndex("DiplomeId");
+
+                    b.HasIndex("NomSemestre")
+                        .IsUnique();
 
                     b.ToTable("semestre");
                 });
@@ -483,19 +504,19 @@ namespace SystemeNote.Migrations
                     b.HasOne("SystemeNote.Models.Etudiant", "Etudiant")
                         .WithMany("NoteEtudiants")
                         .HasForeignKey("EtudiantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SystemeNote.Models.ParcoursEtude", "ParcoursEtude")
                         .WithMany("NoteEtudiants")
                         .HasForeignKey("ParcoursEtudiantId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SystemeNote.Models.Promotion", "Promotion")
                         .WithMany()
                         .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Etudiant");
@@ -507,22 +528,22 @@ namespace SystemeNote.Migrations
 
             modelBuilder.Entity("SystemeNote.Models.ParcoursEtude", b =>
                 {
-                    b.HasOne("SystemNote.Models.Matiere", "Matiere")
+                    b.HasOne("SystemeNote.Models.Matiere", "Matiere")
                         .WithMany("ParcoursEtudes")
                         .HasForeignKey("MatiereId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SystemeNote.Models.PlanifSemestre", "PlanifSemestre")
                         .WithMany("ParcoursEtudes")
                         .HasForeignKey("PlanifSemestreId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SystemeNote.Models.UniteEnseignement", "UniteEnseignement")
                         .WithMany("ParcoursEtudes")
                         .HasForeignKey("UniteEnseignementId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Matiere");
@@ -537,19 +558,19 @@ namespace SystemeNote.Migrations
                     b.HasOne("SystemeNote.Models.OptionEtude", "OptionEtude")
                         .WithMany("PlanifSemestres")
                         .HasForeignKey("OptionEtudeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SystemeNote.Models.Promotion", "Promotion")
                         .WithMany()
                         .HasForeignKey("PromotionId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("SystemeNote.Models.Semestre", "Semestre")
                         .WithMany("PlanifSemestres")
                         .HasForeignKey("SemestreId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("OptionEtude");
@@ -570,9 +591,15 @@ namespace SystemeNote.Migrations
                     b.Navigation("Diplome");
                 });
 
-            modelBuilder.Entity("SystemNote.Models.Matiere", b =>
+            modelBuilder.Entity("SystemeNote.Models.Semestre", b =>
                 {
-                    b.Navigation("ParcoursEtudes");
+                    b.HasOne("SystemeNote.Models.Diplome", "Diplome")
+                        .WithMany()
+                        .HasForeignKey("DiplomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Diplome");
                 });
 
             modelBuilder.Entity("SystemeNote.Models.Administrateur", b =>
@@ -585,6 +612,11 @@ namespace SystemeNote.Migrations
                     b.Navigation("HistoriqueSemestreEtudiants");
 
                     b.Navigation("NoteEtudiants");
+                });
+
+            modelBuilder.Entity("SystemeNote.Models.Matiere", b =>
+                {
+                    b.Navigation("ParcoursEtudes");
                 });
 
             modelBuilder.Entity("SystemeNote.Models.OptionEtude", b =>

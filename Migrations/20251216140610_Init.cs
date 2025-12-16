@@ -1,11 +1,12 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace SystemeNote.Migrations
 {
     /// <inheritdoc />
-    public partial class CreateTables : Migration
+    public partial class Init : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -79,18 +80,6 @@ namespace SystemeNote.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "semestre",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false),
-                    nom_semestre = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_semestre", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "unite_enseignement",
                 columns: table => new
                 {
@@ -121,6 +110,27 @@ namespace SystemeNote.Migrations
                     table.ForeignKey(
                         name: "FK_Promotion_Diplome_DiplomeId",
                         column: x => x.DiplomeId,
+                        principalTable: "Diplome",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "semestre",
+                columns: table => new
+                {
+                    Id = table.Column<int>(type: "int", nullable: false)
+                        .Annotation("SqlServer:Identity", "1, 1"),
+                    code_semestre = table.Column<string>(type: "nvarchar(15)", maxLength: 15, nullable: false),
+                    nom_semestre = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
+                    diplome_id = table.Column<int>(type: "int", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_semestre", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_semestre_Diplome_diplome_id",
+                        column: x => x.diplome_id,
                         principalTable: "Diplome",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
@@ -189,7 +199,7 @@ namespace SystemeNote.Migrations
                         column: x => x.promotion_id,
                         principalTable: "Promotion",
                         principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
                         name: "FK_etudiant_administrateur_administrateur_id",
                         column: x => x.administrateur_id,
@@ -390,6 +400,23 @@ namespace SystemeNote.Migrations
                 name: "IX_Promotion_NomPromotion",
                 table: "Promotion",
                 column: "NomPromotion",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_semestre_code_semestre",
+                table: "semestre",
+                column: "code_semestre",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_semestre_diplome_id",
+                table: "semestre",
+                column: "diplome_id");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_semestre_nom_semestre",
+                table: "semestre",
+                column: "nom_semestre",
                 unique: true);
         }
 
