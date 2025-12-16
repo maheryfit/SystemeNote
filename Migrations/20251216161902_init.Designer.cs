@@ -12,8 +12,8 @@ using SystemeNote.Data;
 namespace SystemeNote.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251216140610_Init")]
-    partial class Init
+    [Migration("20251216161902_init")]
+    partial class init
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

@@ -38,6 +38,11 @@
                 <label asp-for="OptionEtudeId" class="control-label">Option d'étude</label>
                 <select asp-for="OptionEtudeId" class="form-control" asp-items="ViewBag.OptionEtudeId"></select>
             </div>
+            <div class="form-group mb-3">
+                <label asp-for="TotalCredit" class="control-label"></label>
+                <input asp-for="TotalCredit" class="form-control" type="number" />
+                <span asp-validation-for="TotalCredit" class="text-danger"></span>
+            </div>
             <div class="form-group">
                 <input type="submit" value="Create" class="btn btn-primary" />
             </div>

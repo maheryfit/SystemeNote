@@ -19,8 +19,8 @@ namespace SystemeNote.Controllers
         // GET: Etudiant
         public async Task<IActionResult> Index()
         {
-            // var appDbContext = _context.Etudiants.Include(e => e.Administrateur).Include(e => e.Promotion).Include(e => e.PlanifSemestre);
-            return View(await _context.Etudiants.ToListAsync());
+            var appDbContext = _context.Etudiants.Include(e => e.Administrateur).Include(e => e.Promotion).Include(e => e.PlanifSemestre);
+            return View(await appDbContext.ToListAsync());
         }
 
         // GET: Etudiant/Details/5
@@ -52,6 +52,7 @@ namespace SystemeNote.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,Matricule,Nom,Prenom,DateNaissance,PromotionId,Genre,IsActif,DateAdmission,AdministrateurId,PlanifSemestreId,MotDePasse")] Etudiant etudiant)
         {
+
             if (ModelState.IsValid)
             {
                 _context.Add(etudiant);

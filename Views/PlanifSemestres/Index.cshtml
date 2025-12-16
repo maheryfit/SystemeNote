@@ -1,6 +1,62 @@
+@model IEnumerable<SystemeNote.Models.PlanifSemestre>
 @{
     ViewData["Title"] = "Planifications des semestres";
 }
 <h1>Planifications des semestres</h1>
 <p><a asp-action="Create">Create New</a></p>
-<p>Placeholder list for `PlanifSemestre`.</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.NomPlanifSemestre)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateDebut)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.DateFin)
+            </th>
+            <th>
+                Semestre
+            </th>
+            <th>
+                Promotion
+            </th>
+            <th>
+                Option d'étude
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.NomPlanifSemestre)
+                </td>
+                <td>
+                    @item.DateDebut.ToShortDateString()
+                </td>
+                <td>
+                    @item.DateFin.ToShortDateString()
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Semestre!.NomSemestre)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Promotion!.NomPromotion)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.OptionEtude!.NomOptionEtude)
+                </td>
+                <td>
+                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

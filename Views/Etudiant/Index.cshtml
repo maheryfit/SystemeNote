@@ -42,7 +42,7 @@
                     @Html.DisplayFor(modelItem => item.Matricule)
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Promotion.NomPromotion)
+                    @Html.DisplayFor(modelItem => item.Promotion!.NomPromotion)
                 </td>
                 <td>
                     <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |

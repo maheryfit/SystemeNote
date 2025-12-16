@@ -1,6 +1,52 @@
+@model IEnumerable<SystemeNote.Models.NoteEtudiant>
+
 @{
     ViewData["Title"] = "Notes des étudiants";
 }
 <h1>Notes des étudiants</h1>
 <p><a asp-action="Create">Create New</a></p>
-<p>Placeholder list for `NoteEtudiant`.</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                Étudiant
+            </th>
+            <th>
+                Matière
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.Note)
+            </th>
+            <th>
+                Promotion
+            </th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Etudiant!.Matricule) - @Html.DisplayFor(modelItem =>
+                    item.Etudiant!.Nom)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.ParcoursEtude!.Matiere!.NomMatiere)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Note)
+            </td>
+            <td>
+                @Html.DisplayFor(modelItem => item.Promotion!.NomPromotion)
+            </td>
+            <td>
+                <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
+                <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
+                <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+            </td>
+        </tr>
+                }
+    </tbody>
+</table>

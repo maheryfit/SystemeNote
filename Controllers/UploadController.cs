@@ -28,19 +28,19 @@ namespace SystemeNote.Controllers
         public IActionResult UploadStudents()
         {
             ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion");
-            ViewData["AdminId0"] = new SelectList(_context.Administrateurs, "Id", "NomAdmin");
-            ViewData["PlanifSemestreId"] = new SelectList(_context.PlanifSemestres, "Id", "NomPlanifSemestre");
+            ViewData["AdministrateurId"] = new SelectList(_context.Administrateurs, "Id", "NomAdmin");
+            ViewData["PlanifSemestreIdy"] = new SelectList(_context.PlanifSemestres, "Id", "NomPlanifSemestre");
             return View();
         }
 
         // POST: /Upload/UploadStudents
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> UploadStudents(IFormFile file, int promotionId, int adminId, int planifSemestreId)
+        public async Task<IActionResult> UploadStudents(IFormFile file, int promotionId, int administrateurId, int planifSemestreId)
         {
-            var promotion = await _context.Promotions.FindAsync(promotionId);
-            var admin = await _context.Administrateurs.FindAsync(adminId);
-            var planifSemestre = await _context.PlanifSemestres.FindAsync(planifSemestreId);
+            var promotion = await _context.Promotions.FindAsync(promotionId) ?? throw new Exception("Promotion non trouvée.");
+            var admin = await _context.Administrateurs.FindAsync(administrateurId) ?? throw new Exception("Administrateur non trouvé.");
+            var planifSemestre = await _context.PlanifSemestres.FindAsync(planifSemestreId) ?? throw new Exception("Planification de semestre non trouvée.");
 
             var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
             {
@@ -57,10 +57,10 @@ namespace SystemeNote.Controllers
                     MotDePasse = cols[7],
                     PromotionId = promotionId,
                     PlanifSemestreId = planifSemestreId,
-                    Promotion = promotion!,
-                    Administrateur = admin!,
-                    PlanifSemestre = planifSemestre!,
-                    AdministrateurId = adminId,
+                    Promotion = promotion,
+                    Administrateur = admin,
+                    PlanifSemestre = planifSemestre,
+                    AdministrateurId = administrateurId,
                     NoteEtudiants = new List<NoteEtudiant>(),
                     HistoriqueSemestreEtudiants = new List<HistoriqueSemestreEtudiant>()
                 };

@@ -23,7 +23,9 @@ namespace SystemeNote.Controllers
         {
             var appDbContext = _context.PlanifSemestres
                                        .Include(p => p.Semestre)
-                                       .Include(p => p.Promotion);
+                                       .Include(p => p.Promotion)
+                                       .Include(p => p.OptionEtude)
+                                       .OrderByDescending(p => p.Id);
             return View(await appDbContext.ToListAsync());
         }
 
@@ -39,21 +41,33 @@ namespace SystemeNote.Controllers
         // POST: PlanifSemestres/Create
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,NomPlanifSemestre,DateDebut,DateFin,SemestreId,PromotionId,OptionEtudeId")] PlanifSemestre planifSemestre)
+        public async Task<IActionResult> Create([Bind("Id,NomPlanifSemestre,DateDebut,DateFin,SemestreId,PromotionId,OptionEtudeId,TotalCredit")] PlanifSemestre planifSemestre)
         {
+            // --- Début du débogage ---
+            Console.WriteLine("--- [POST] PlanifSemestres/Create ---");
+            Console.WriteLine($"Nom reçu : {planifSemestre.NomPlanifSemestre}");
+            Console.WriteLine($"SemestreId reçu : {planifSemestre.SemestreId}");
+            Console.WriteLine($"PromotionId reçu : {planifSemestre.PromotionId}");
+            Console.WriteLine($"OptionEtudeId reçu : {planifSemestre.OptionEtudeId}");
+            Console.WriteLine($"TotalCredit reçu : {planifSemestre.TotalCredit}");
+            // --- Fin du débogage ---
+            planifSemestre.ParcoursEtudes = new List<ParcoursEtude>();
+            planifSemestre.Etudiants = new List<Etudiant>();
+            planifSemestre.HistoriqueSemestreEtudiants = new List<HistoriqueSemestreEtudiant>();
+
+
+            // Les collections ParcoursEtudes, Etudiants, HistoriqueSemestreEtudiants
+            // sont maintenant initialisées dans le constructeur du modèle PlanifSemestre.
+
             if (ModelState.IsValid)
             {
-                // Charger explicitement les entités Semestre et Promotion pour satisfaire les propriétés de navigation 'required'
-                planifSemestre.Semestre = await _context.Semestres.FindAsync(planifSemestre.SemestreId) ?? throw new InvalidOperationException("Semestre non trouvé.");
-                planifSemestre.Promotion = await _context.Promotions.FindAsync(planifSemestre.PromotionId) ?? throw new InvalidOperationException("Promotion non trouvée.");
-                planifSemestre.OptionEtude = await _context.OptionEtudes.FindAsync(planifSemestre.OptionEtudeId) ?? throw new InvalidOperationException("Option d'étude non trouvée.");
-
+                Console.WriteLine("Le modèle est VALIDE. Ajout à la base de données.");
                 _context.Add(planifSemestre);
-                // Initialiser les collections requises si elles ne le sont pas déjà dans le constructeur du modèle
-                // planifSemestre.ParcoursEtudes = planifSemestre.ParcoursEtudes ?? new List<ParcoursEtude>();
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
+
+            Console.WriteLine("Le modèle est INVALIDE. Retour à la vue.");
             ViewData["SemestreId"] = new SelectList(_context.Semestres, "Id", "NomSemestre", planifSemestre.SemestreId);
             ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion", planifSemestre.PromotionId);
             ViewData["OptionEtudeId"] = new SelectList(_context.OptionEtudes, "Id", "NomOptionEtude", planifSemestre.OptionEtudeId);
@@ -61,5 +75,8 @@ namespace SystemeNote.Controllers
         }
 
         // Other CRUD actions (Details, Edit, Delete) would go here
+        
     }
+
+
 }
