@@ -17,5 +17,11 @@ namespace SystemeNote.Models
         public required string NomOptionEtude { get; set; }
 
         public required ICollection<PlanifSemestre> PlanifSemestres { get; set; }
+
+        public OptionEtude()
+        {
+            // Initialisation de la collection pour éviter les erreurs "field is required"
+            PlanifSemestres = new List<PlanifSemestre>();
+        }
     }
 }

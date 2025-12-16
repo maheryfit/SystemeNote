@@ -1,9 +1,29 @@
+@model SystemeNote.Models.OptionEtude
 @{
     ViewData["Title"] = "Edit Option d\'étude";
 }
-<h1>Edit Option d'étude</h1>
-<form asp-action="Edit" method="post">
-    <!-- Editable fields -->
-    <button type="submit">Save</button>
-    <a asp-action="Index">Cancel</a>
-</form>
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Option d'étude</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group mb-3">
+                <label asp-for="NomOptionEtude" class="control-label"></label>
+                <input asp-for="NomOptionEtude" class="form-control" />
+                <span asp-validation-for="NomOptionEtude" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

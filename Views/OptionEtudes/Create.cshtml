@@ -1,9 +1,28 @@
+@model SystemeNote.Models.OptionEtude
 @{
     ViewData["Title"] = "Create Option d\'étude";
 }
-<h1>Create Option d'étude</h1>
-<form asp-action="Create" method="post">
-    <!-- Fields for OptionEtude -->
-    <button type="submit">Create</button>
-    <a asp-action="Index">Cancel</a>
-</form>
+
+<h1>@ViewData["Title"]</h1>
+
+<h4>Option d'étude</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group mb-3">
+                <label asp-for="NomOptionEtude" class="control-label"></label>
+                <input asp-for="NomOptionEtude" class="form-control" />
+                <span asp-validation-for="NomOptionEtude" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

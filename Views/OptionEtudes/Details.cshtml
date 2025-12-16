@@ -1,6 +1,23 @@
+@model SystemeNote.Models.OptionEtude
 @{
     ViewData["Title"] = "Option d\'étude Details";
 }
-<h1>Option d'étude Details</h1>
-<p>Placeholder details for `OptionEtude`.</p>
-<p><a asp-action="Index">Back to List</a></p>
+
+<h1>Details</h1>
+
+<div>
+    <h4>Option d'étude</h4>
+    <hr />
+    <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.NomOptionEtude)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.NomOptionEtude)
+        </dd>
+    </dl>
+</div>
+<div>
+    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Index">Back to List</a>
+</div>

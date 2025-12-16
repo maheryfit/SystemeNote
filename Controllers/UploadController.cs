@@ -210,6 +210,28 @@ namespace SystemeNote.Controllers
         }
         #endregion
 
+        #region OptionEtudes
+        public IActionResult UploadOptionEtudes() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadOptionEtudes(IFormFile file)
+        {
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 1) throw new Exception("Le fichier CSV doit contenir 1 colonne : NomOptionEtude");
+                var nomOptionEtude = cols[0];
+                if (string.IsNullOrWhiteSpace(nomOptionEtude)) return;
+
+                var exists = await _context.OptionEtudes.AnyAsync(o => o.NomOptionEtude == nomOptionEtude);
+                if (!exists) _context.OptionEtudes.Add(new OptionEtude { NomOptionEtude = nomOptionEtude, PlanifSemestres = new List<PlanifSemestre>() });
+            });
+            TempData["Message"] = result;
+            return RedirectToAction(nameof(Index));
+        }
+        #endregion
+
+
         private static DateTime ParseDate(string s)
         {
             if (DateTime.TryParseExact(s, new[] { "yyyy-MM-dd", "yyyy/MM/dd", "dd/MM/yyyy", "MM/dd/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))
