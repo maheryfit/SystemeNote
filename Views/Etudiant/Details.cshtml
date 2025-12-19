@@ -1,7 +1,7 @@
 @model SystemeNote.Models.Etudiant
 
 @{
-    ViewData["Title"] = "Details";
+    ViewData["Title"] = "Détails de l'étudiant";
 }
 
 <h1>Details</h1>
@@ -10,6 +10,12 @@
     <h4>Etudiant</h4>
     <hr />
     <dl class="row">
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Matricule)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Matricule)
+        </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Nom)
         </dt>
@@ -29,26 +35,44 @@
             @Html.DisplayFor(model => model.DateNaissance)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Matricule)
+            @Html.DisplayNameFor(model => model.Genre)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Matricule)
+            @Html.DisplayFor(model => model.Genre)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.IsActif)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.IsActif)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.DateAdmission)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.DateAdmission)
+        </dd>
+        <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Promotion)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Promotion!.NomPromotion)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.PlanifSemestre)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.PlanifSemestre.Id)
+            @Html.DisplayFor(model => model.PlanifSemestre!.NomPlanifSemestre)
         </dd>
         <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Administrateur)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Administrateur.NomAdmin)
+            @Html.DisplayFor(model => model.Administrateur!.NomAdmin)
         </dd>
     </dl>
 </div>
 <div class="mt-3">
-    <a asp-action="Edit" asp-route-id="@Model?.Id">Edit</a> |
+    <a asp-action="Edit" asp-route-id="@Model.Id">Edit</a> |
     <a asp-action="Index">Back to List</a>
 </div>

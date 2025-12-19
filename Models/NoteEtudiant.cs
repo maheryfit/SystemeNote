@@ -32,10 +32,10 @@ namespace SystemeNote.Models
 
 
         [ForeignKey("ParcoursEtudiantId")]
-        public virtual required ParcoursEtude ParcoursEtude { get; set; }
+        public virtual  ParcoursEtude? ParcoursEtude { get; set; }
 
         [ForeignKey("PromotionId")]
-        public virtual required Promotion Promotion { get; set; }
+        public virtual  Promotion? Promotion { get; set; }
     }
 
 }

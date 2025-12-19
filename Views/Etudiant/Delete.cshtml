@@ -12,6 +12,12 @@
     <hr />
     <dl class="row">
         <dt class="col-sm-2">
+            @Html.DisplayNameFor(model => model.Matricule)
+        </dt>
+        <dd class="col-sm-10">
+            @Html.DisplayFor(model => model.Matricule)
+        </dd>
+        <dt class="col-sm-2">
             @Html.DisplayNameFor(model => model.Nom)
         </dt>
         <dd class="col-sm-10">
@@ -24,28 +30,10 @@
             @Html.DisplayFor(model => model.Prenom)
         </dd>
         <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.DateNaissance)
+            @Html.DisplayNameFor(model => model.Promotion)
         </dt>
         <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.DateNaissance)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Matricule)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Matricule)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.PlanifSemestre)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.PlanifSemestre.Id)
-        </dd>
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => model.Administrateur)
-        </dt>
-        <dd class="col-sm-10">
-            @Html.DisplayFor(model => model.Administrateur.Id)
+            @Html.DisplayFor(model => model.Promotion!.NomPromotion)
         </dd>
     </dl>
 
