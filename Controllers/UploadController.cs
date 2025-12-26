@@ -68,7 +68,7 @@ namespace SystemeNote.Controllers
             });
 
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Students");
         }
         #endregion
 
@@ -89,7 +89,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Administrateurs.Add(new Administrateur { NomAdmin = nomAdmin, PrenomAdmin = prenomAdmin });
             });
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Administrateurs");
         }
         #endregion
 
@@ -109,7 +109,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Diplomes.Add(new Diplome { NomDiplome = nomDiplome });
             });
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Diplomes");
         }
         #endregion
 
@@ -129,7 +129,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Promotions.Add(new Promotion { NomPromotion = cols[0], DateCreation = DateOnly.Parse(cols[1]), CodePromotion = cols[2], DiplomeId = diplomeId });
             });
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Home");
         }
         #endregion
 
@@ -150,7 +150,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Matieres.Add(new Matiere { NomMatiere = nomMatiere, CodeMatiere = codeMatiere, ParcoursEtudes = new List<ParcoursEtude>() });
             });
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToPage("Index", "Matieres");
         }
         #endregion
 
@@ -171,7 +171,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Configs.Add(new Config { Description = description, Valeur = valeur });
             });
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Configs");
         }
         #endregion
 
@@ -190,7 +190,7 @@ namespace SystemeNote.Controllers
             if (diplome == null)
             {
                 TempData["Message"] = "Erreur : Le diplôme sélectionné n'existe pas.";
-                return RedirectToAction(nameof(Index));
+                return RedirectToAction(nameof(UploadSemestres));
             }
 
             var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
@@ -206,7 +206,7 @@ namespace SystemeNote.Controllers
                 }
             });
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "Semestres");
         }
         #endregion
 
@@ -227,7 +227,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.OptionEtudes.Add(new OptionEtude { NomOptionEtude = nomOptionEtude, PlanifSemestres = new List<PlanifSemestre>() });
             });
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "OptionEtudes");
         }
         #endregion
 
