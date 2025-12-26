@@ -68,7 +68,7 @@ namespace SystemeNote.Controllers
             });
 
             TempData["Message"] = result;
-            return RedirectToAction("Index", "Students");
+            return RedirectToAction("Index", "Etudiant");
         }
         #endregion
 
@@ -150,7 +150,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Matieres.Add(new Matiere { NomMatiere = nomMatiere, CodeMatiere = codeMatiere, ParcoursEtudes = new List<ParcoursEtude>() });
             });
             TempData["Message"] = result;
-            return RedirectToPage("Index", "Matieres");
+            return RedirectToAction("Index", "Matieres");
         }
         #endregion
 
@@ -252,7 +252,7 @@ namespace SystemeNote.Controllers
                 }
             });
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "UniteEnseignements");
         }
         #endregion
 
@@ -284,7 +284,7 @@ namespace SystemeNote.Controllers
                 if (addedParcoursKeys.Contains(key)) return;
 
                 var missing = new List<string>();
-                
+
                 int? matiereId = null;
                 Matiere? newMatiereEntity = null;
 
@@ -301,11 +301,11 @@ namespace SystemeNote.Controllers
                     }
                     else
                     {
-                        newMatiereEntity = new Matiere 
-                        { 
-                            CodeMatiere = codeMatiere, 
+                        newMatiereEntity = new Matiere
+                        {
+                            CodeMatiere = codeMatiere,
                             NomMatiere = codeMatiere, // On utilise le code comme nom par défaut
-                            ParcoursEtudes = new List<ParcoursEtude>() 
+                            ParcoursEtudes = new List<ParcoursEtude>()
                         };
                         _context.Matieres.Add(newMatiereEntity);
                         newMatieres[codeMatiere] = newMatiereEntity;
@@ -335,11 +335,11 @@ namespace SystemeNote.Controllers
 
                 if (!exists)
                 {
-                    var parcours = new ParcoursEtude 
-                    { 
-                        UniteEnseignementId = ueId, 
-                        PlanifSemestreId = planifId, 
-                        NoteEtudiants = new List<NoteEtudiant>() 
+                    var parcours = new ParcoursEtude
+                    {
+                        UniteEnseignementId = ueId,
+                        PlanifSemestreId = planifId,
+                        NoteEtudiants = new List<NoteEtudiant>()
                     };
 
                     if (matiereId.HasValue)
@@ -364,7 +364,7 @@ namespace SystemeNote.Controllers
             }
 
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index","ParcoursEtudes");
         }
         #endregion
 
@@ -486,7 +486,7 @@ namespace SystemeNote.Controllers
             }
 
             TempData["Message"] = result;
-            return RedirectToAction(nameof(Index));
+            return RedirectToAction("Index", "NoteEtudiants");
         }
         #endregion
 
