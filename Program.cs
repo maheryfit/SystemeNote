@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using Rotativa.AspNetCore;
 using System.IO;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +18,16 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
 
 // Add services to the container.
 builder.Services.AddRazorPages();
+
+builder.Services.Configure<FormOptions>(options =>
+{
+    options.MultipartBodyLengthLimit = 10 * 1024 * 1024; // 10MB
+});
+
+builder.Services.Configure<KestrelServerOptions>(options =>
+{
+    options.Limits.MaxRequestBodySize = 10 * 1024 * 1024; // 10MB
+});
 
 var app = builder.Build();
 
