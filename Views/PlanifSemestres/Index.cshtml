@@ -1,21 +1,36 @@
-@model IEnumerable<SystemeNote.Models.PlanifSemestre>
+@model SystemeNote.Utils.PaginatedList<SystemeNote.Models.PlanifSemestre>
 @{
     ViewData["Title"] = "Planifications des semestres";
 }
 <h1>Planifications des semestres</h1>
-<p><a asp-action="Create">Create New</a></p>
+<p>
+    <a asp-action="Create" class="btn btn-primary">Create New</a>
+</p>
+
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color mb-3">
+        <p>
+            Rechercher par nom: <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
+            <input type="submit" value="Search" class="btn btn-dark btn-sm" /> |
+            <a asp-action="Index">Retour à la liste complète</a>
+        </p>
+    </div>
+</form>
 
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.NomPlanifSemestre)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]"
+                    asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    planif
+                </a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateDebut)
+                date début
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.DateFin)
+                date fin
             </th>
             <th>
                 Semestre
@@ -34,7 +49,9 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.NomPlanifSemestre)
+                    <a asp-action="Ranking" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.NomPlanifSemestre)
+                    </a>
                 </td>
                 <td>
                     @item.DateDebut.ToShortDateString()
@@ -56,7 +73,22 @@
                     <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
                     <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
                 </td>
+
             </tr>
         }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index" asp-route-sortOrder="@ViewData["CurrentSort"]" asp-route-pageNumber="@(Model.PageIndex - 1)"
+    asp-route-currentFilter="@ViewData["CurrentFilter"]" class="btn btn-default @prevDisabled">
+    Précédent
+</a>
+<a asp-action="Index" asp-route-sortOrder="@ViewData["CurrentSort"]" asp-route-pageNumber="@(Model.PageIndex + 1)"
+    asp-route-currentFilter="@ViewData["CurrentFilter"]" class="btn btn-default @nextDisabled">
+    Suivant
+</a>

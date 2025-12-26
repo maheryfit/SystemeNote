@@ -1,0 +1,106 @@
+@model SystemeNote.ViewModels.ProfesseurDashboardViewModel
+
+@{
+    ViewData["Title"] = "Tableau de bord Professeur";
+}
+
+<div class="container mt-4">
+    <h2>Tableau de bord des professeurs</h2>
+
+    <h4 class="mt-4">Planifications de semestre</h4>
+    <div class="row">
+        @foreach (var s in Model.SemestreStats)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@s.NomPlanifSemestre</h5>
+                        <p class="card-text">Total étudiants: <strong>@s.TotalEtudiants</strong></p>
+                        <p class="card-text">Admis: <strong>@s.Admis</strong> (@String.Format("{0:0.##}%%",
+                                                    s.PourcentageAdmis))</p>
+                    <p class="card-text">Ajournés: <strong>@s.Ajournes</strong> (@String.Format("{0:0.##}%%",
+                                                s.PourcentageAjournes))</p>
+                    <p class="card-text">Moyenne: <strong>@s.MoyenneClasse.ToString("F2")</strong></p>
+                </div>
+            </div>
+        </div>
+                }
+    </div>
+
+    <h4 class="mt-4">Promotions (progression)</h4>
+    <div class="row">
+        @foreach (var p in Model.PromotionProgress)
+        {
+            <div class="col-md-4 mb-3">
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title">@p.NomPromotion</h5>
+                        <p class="card-text">Admis (actuelle): <strong>@p.AdmisCurrent</strong></p>
+                        <p class="card-text">Admis (précédente): <strong>@p.AdmisPrevious</strong></p>
+                        <p class="card-text">Progression: <strong>@String.Format("{0:0.##}%%",
+                                                            p.PourcentageProgression)</strong></p>
+                </div>
+            </div>
+        </div>
+                }
+    </div>
+
+    <div class="row mt-5">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Moyenne par Semestre</div>
+                <div class="card-body">
+                    <canvas id="avgChart"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header">Taux de réussite (%)</div>
+                <div class="card-body">
+                    <canvas id="successChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const labels = @Html.Raw(Json.Serialize(Model.SemestreStats.Select(s => s.NomPlanifSemestre)));
+            const avgData = @Html.Raw(Json.Serialize(Model.SemestreStats.Select(s => s.MoyenneClasse)));
+            const successData = @Html.Raw(Json.Serialize(Model.SemestreStats.Select(s => s.PourcentageAdmis)));
+
+            // Chart Moyenne
+            new Chart(document.getElementById('avgChart'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Moyenne de la classe',
+                        data: avgData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.6)'
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true, max: 20 } } }
+            });
+
+            // Chart Réussite
+            new Chart(document.getElementById('successChart'), {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Taux de réussite (%)',
+                        data: successData,
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        tension: 0.1
+                    }]
+                },
+                options: { scales: { y: { beginAtZero: true, max: 100 } } }
+            });
+        });
+    </script>
+}

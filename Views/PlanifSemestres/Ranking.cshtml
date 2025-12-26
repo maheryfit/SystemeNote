@@ -1,0 +1,160 @@
+@model SystemeNote.ViewModels.SemesterRankingViewModel
+@using SystemeNote.ViewModels
+
+@{
+    ViewData["Title"] = $"Classement pour {Model.PlanifSemestre.NomPlanifSemestre}";
+}
+
+<h1>@ViewData["Title"]</h1>
+
+<div class="card mb-4">
+    <div class="card-header">
+        Statistiques de la promotion
+    </div>
+    <div class="card-body">
+        <div class="row">
+            <div class="col-md-3">
+                <strong>Admis:</strong> @Model.Stats.AdmisCount (@Model.Stats.AdmisPercentage.ToString("F1")%)
+            </div>
+            <div class="col-md-3">
+                <strong>Ajournés:</strong> @Model.Stats.AjourneCount (@Model.Stats.AjournePercentage.ToString("F1")%)
+            </div>
+            <div class="col-md-3">
+                <strong>Moyenne de classe:</strong> @Model.Stats.ClassAverage.ToString("F2")
+            </div>
+            <div class="col-md-3">
+                <strong>Variance des notes:</strong> @Model.Stats.GradeVariance.ToString("F2")
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">Répartition Admis / Ajournés</div>
+            <div class="card-body"><canvas id="statusChart"></canvas></div>
+        </div>
+    </div>
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">Distribution des moyennes</div>
+            <div class="card-body"><canvas id="gradesDistributionChart"></canvas></div>
+        </div>
+    </div>
+</div>
+
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Rang</th>
+            <th>Matricule</th>
+            <th>Nom</th>
+            <th>Prénom</th>
+            @foreach (var ue in Model.StudentRankings.FirstOrDefault()?.UeGrades ?? new List<UeGradeRecord>())
+            {
+                <th class="text-center" title="@ue.UeName">@ue.UeCode</th>
+            }
+            <th class="text-center">Moyenne Générale</th>
+            <th>Statut</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.StudentRankings)
+        {
+            var statusClass = item.Status == "Admis" ? "text-success" : "text-danger";
+            <tr>
+                <td><strong>@item.Rank</strong></td>
+                <td>@item.Etudiant.Matricule</td>
+                <td>
+                    <a asp-controller="Etudiant" asp-action="AcademicRecord" asp-route-id="@item.Etudiant.Id">
+                        @item.Etudiant.Nom
+                    </a>
+                </td>
+                <td>@item.Etudiant.Prenom</td>
+                @foreach (var ueGrade in item.UeGrades)
+                {
+                    <td class="text-center">@ueGrade.UeAverage.ToString("F2")</td>
+                }
+                <td class="text-center"><strong>@item.OverallAverage.ToString("F2")</strong></td>
+                <td><strong class="@statusClass">@item.Status</strong></td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@if (!Model.StudentRankings.Any())
+{
+    <div class="alert alert-info">
+        Aucun étudiant avec des notes n'a été trouvé pour cette planification de semestre.
+    </div>
+}
+
+<div class="mt-3">
+    <a asp-action="Index" class="btn btn-secondary">Retour à la liste des planifications</a>
+    <!-- Export Excel removed -->
+    <a asp-action="ExportToPdf" asp-route-id="@Model.PlanifSemestre.Id" class="btn btn-danger">Exporter vers PDF</a>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            // 1. Données pour le graphique de statut (Admis/Ajourné)
+            const admisCount = @Model.Stats.AdmisCount;
+            const ajourneCount = @Model.Stats.AjourneCount;
+
+            const statusCtx = document.getElementById('statusChart').getContext('2d');
+            new Chart(statusCtx, {
+                type: 'pie',
+                data: {
+                    labels: ['Admis', 'Ajournés'],
+                    datasets: [{
+                        label: 'Répartition',
+                        data: [admisCount, ajourneCount],
+                        backgroundColor: [
+                            'rgba(40, 167, 69, 0.7)', // Vert pour Admis
+                            'rgba(220, 53, 69, 0.7)'  // Rouge pour Ajourné
+                        ],
+                        borderColor: [
+                            'rgba(40, 167, 69, 1)',
+                            'rgba(220, 53, 69, 1)'
+                        ],
+                        borderWidth: 1
+                    }]
+                }
+            });
+
+            // 2. Données pour le graphique de distribution des moyennes
+            @{
+                    var gradeBuckets = new Dictionary<string, int> { { "0-8", 0 }, { "8-10", 0 }, { "10-12", 0 }, { "12-14", 0 }, { "14-16", 0 }, { "16+", 0 } };
+                            foreach (var student in Model.StudentRankings)
+                    {
+                        var avg = student.OverallAverage;
+                        if (avg < 8) gradeBuckets["0-8"]++;
+                                        else if (avg < 10) gradeBuckets["8-10"]++;
+                                        else if (avg < 12) gradeBuckets["10-12"]++;
+                                        else if (avg < 14) gradeBuckets["12-14"]++;
+                                        else if (avg < 16) gradeBuckets["14-16"]++;
+                        else gradeBuckets["16+"]++;
+                    }
+                }
+
+                const gradeLabels = @Html.Raw(Json.Serialize(gradeBuckets.Keys));
+            const gradeData = @Html.Raw(Json.Serialize(gradeBuckets.Values));
+
+            const gradesCtx = document.getElementById('gradesDistributionChart').getContext('2d');
+            new Chart(gradesCtx, {
+                type: 'bar',
+                data: {
+                    labels: gradeLabels,
+                    datasets: [{
+                        label: 'Nombre d\'étudiants',
+                        data: gradeData,
+                        backgroundColor: 'rgba(0, 123, 255, 0.5)'
+                    }]
+                }
+            });
+        });
+    </script>
+}

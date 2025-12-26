@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using SystemeNote.Data;
 using SystemeNote.Models;
+using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
@@ -15,10 +16,48 @@ namespace SystemeNote.Controllers
             _context = context;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
-            var appDbContext = _context.Semestres.Include(s => s.Diplome);
-            return View(await appDbContext.ToListAsync());
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["CodeSortParm"] = String.IsNullOrEmpty(sortOrder) ? "code_desc" : "";
+            ViewData["NameSortParm"] = sortOrder == "name" ? "name_desc" : "name";
+            ViewData["DiplomeSortParm"] = sortOrder == "diplome" ? "diplome_desc" : "diplome";
+
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["Title"] = "Liste des Semestres";
+
+            var semestres = from s in _context.Semestres.Include(s => s.Diplome)
+                            select s;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                semestres = semestres.Where(s => s.NomSemestre.Contains(searchString) || s.CodeSemestre.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "code_desc":
+                    semestres = semestres.OrderByDescending(s => s.CodeSemestre);
+                    break;
+                case "name":
+                    semestres = semestres.OrderBy(s => s.NomSemestre);
+                    break;
+                case "name_desc":
+                    semestres = semestres.OrderByDescending(s => s.NomSemestre);
+                    break;
+                case "diplome":
+                    semestres = semestres.OrderBy(s => s.Diplome!.NomDiplome);
+                    break;
+                case "diplome_desc":
+                    semestres = semestres.OrderByDescending(s => s.Diplome!.NomDiplome);
+                    break;
+                default: // CodeSemestre ascending by default
+                    semestres = semestres.OrderBy(s => s.CodeSemestre);
+                    break;
+            }
+
+            int pageSize = 10;
+            return View(await PaginatedList<Semestre>.CreateAsync(semestres.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         public async Task<IActionResult> Details(int? id)

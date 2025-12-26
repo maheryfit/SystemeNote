@@ -1,9 +1,80 @@
+@model SystemeNote.Models.PlanifSemestre
+
 @{
-    ViewData["Title"] = "Edit PlanifSemestre";
+    ViewData["Title"] = "Modifier la planification de semestre";
 }
-<h1>Edit PlanifSemestre</h1>
-<form asp-action="Edit" method="post">
-    <!-- Editable fields for PlanifSemestre -->
-    <button type="submit">Save</button>
-    <a asp-action="Index">Cancel</a>
+
+<h1 class="mb-4">@ViewData["Title"]</h1>
+
+<form asp-action="Edit" method="post" class="needs-validation" novalidate>
+    <input type="hidden" asp-for="Id" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+    <div class="mb-3">
+        <label asp-for="NomPlanifSemestre" class="form-label"></label>
+        <input asp-for="NomPlanifSemestre" class="form-control" />
+        <span asp-validation-for="NomPlanifSemestre" class="text-danger"></span>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6 mb-3">
+            <label asp-for="DateDebut" class="form-label"></label>
+            <input asp-for="DateDebut" type="date" class="form-control" />
+            <span asp-validation-for="DateDebut" class="text-danger"></span>
+        </div>
+        <div class="col-md-6 mb-3">
+            <label asp-for="DateFin" class="form-label"></label>
+            <input asp-for="DateFin" type="date" class="form-control" />
+            <span asp-validation-for="DateFin" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <label asp-for="SemestreId" class="form-label">Semestre</label>
+            <select asp-for="SemestreId" asp-items="ViewBag.SemestreId" class="form-select"></select>
+            <span asp-validation-for="SemestreId" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="PromotionId" class="form-label">Promotion</label>
+            <select asp-for="PromotionId" asp-items="ViewBag.PromotionId" class="form-select"></select>
+            <span asp-validation-for="PromotionId" class="text-danger"></span>
+        </div>
+        <div class="col-md-4 mb-3">
+            <label asp-for="OptionEtudeId" class="form-label">Option d'étude</label>
+            <select asp-for="OptionEtudeId" asp-items="ViewBag.OptionEtudeId" class="form-select"></select>
+            <span asp-validation-for="OptionEtudeId" class="text-danger"></span>
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <label asp-for="TotalCredit" class="form-label"></label>
+        <input asp-for="TotalCredit" type="number" min="0" class="form-control" />
+        <span asp-validation-for="TotalCredit" class="text-danger"></span>
+    </div>
+
+    <div class="d-flex gap-2">
+        <button type="submit" class="btn btn-primary">Enregistrer</button>
+        <a asp-action="Index" class="btn btn-secondary">Annuler</a>
+    </div>
 </form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        // Simple client-side bootstrap validation enhancement
+        (function () {
+            'use strict'
+            var forms = document.querySelectorAll('.needs-validation')
+            Array.prototype.slice.call(forms).forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+                    form.classList.add('was-validated')
+                }, false)
+            })
+        })()
+    </script>
+}

@@ -1,9 +1,41 @@
+@model SystemeNote.Models.ParcoursEtude
+
 @{
     ViewData["Title"] = "Edit ParcoursEtude";
 }
-<h1>Edit ParcoursEtude</h1>
-<form asp-action="Edit" method="post">
-    <!-- Editable fields for ParcoursEtude -->
-    <button type="submit">Save</button>
-    <a asp-action="Index">Cancel</a>
-</form>
+
+<h1>Edit</h1>
+
+<h4>ParcoursEtude</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <div class="form-group mb-3">
+                <label asp-for="PlanifSemestreId" class="control-label">Planification Semestre</label>
+                <select asp-for="PlanifSemestreId" class="form-control" asp-items="ViewBag.PlanifSemestreId"></select>
+                <span asp-validation-for="PlanifSemestreId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="UniteEnseignementId" class="control-label">Unité d'Enseignement</label>
+                <select asp-for="UniteEnseignementId" class="form-control"
+                    asp-items="ViewBag.UniteEnseignementId"></select>
+                <span asp-validation-for="UniteEnseignementId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="MatiereId" class="control-label">Matière</label>
+                <select asp-for="MatiereId" class="form-control" asp-items="ViewBag.MatiereId"></select>
+                <span asp-validation-for="MatiereId" class="text-danger"></span>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
+    <a asp-action="Index">Back to List</a>
+</div>

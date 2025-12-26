@@ -1,7 +1,7 @@
 @model SystemeNote.Models.Etudiant
 
 @{
-    ViewData["Title"] = "Edit";
+    ViewData["Title"] = "Modifier l'étudiant";
 }
 
 <h1>Edit</h1>
@@ -11,37 +11,62 @@
 <div class="row">
     <div class="col-md-4">
         <form asp-action="Edit">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <div asp-validation-summary="All" class="text-danger"></div>
             <input type="hidden" asp-for="Id" />
-            <div class="form-group">
-                <label asp-for="Nom" class="control-label"></label>
-                <input asp-for="Nom" class="form-control" />
-                <span asp-validation-for="Nom" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="Prenom" class="control-label"></label>
-                <input asp-for="Prenom" class="form-control" />
-                <span asp-validation-for="Prenom" class="text-danger"></span>
-            </div>
-            <div class="form-group">
-                <label asp-for="DateNaissance" class="control-label"></label>
-                <input asp-for="DateNaissance" class="form-control" />
-                <span asp-validation-for="DateNaissance" class="text-danger"></span>
-            </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="Matricule" class="control-label"></label>
                 <input asp-for="Matricule" class="form-control" />
                 <span asp-validation-for="Matricule" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
+                <label asp-for="Nom" class="control-label"></label>
+                <input asp-for="Nom" class="form-control" />
+                <span asp-validation-for="Nom" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Prenom" class="control-label"></label>
+                <input asp-for="Prenom" class="form-control" />
+                <span asp-validation-for="Prenom" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="DateNaissance" class="control-label"></label>
+                <input asp-for="DateNaissance" class="form-control" type="date" />
+                <span asp-validation-for="DateNaissance" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="DateAdmission" class="control-label"></label>
+                <input asp-for="DateAdmission" class="form-control" type="date" />
+                <span asp-validation-for="DateAdmission" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="Genre" class="control-label"></label>
+                <input asp-for="Genre" class="form-control" />
+                <span asp-validation-for="Genre" class="text-danger"></span>
+            </div>
+            <div class="form-group form-check mb-3">
+                <label class="form-check-label">
+                    <input class="form-check-input" asp-for="IsActif" /> @Html.DisplayNameFor(model => model.IsActif)
+                </label>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="PromotionId" class="control-label"></label>
+                <select asp-for="PromotionId" class="form-control" asp-items="ViewBag.PromotionId"></select>
+                <span asp-validation-for="PromotionId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
                 <label asp-for="PlanifSemestreId" class="control-label"></label>
                 <select asp-for="PlanifSemestreId" class="form-control" asp-items="ViewBag.PlanifSemestreId"></select>
                 <span asp-validation-for="PlanifSemestreId" class="text-danger"></span>
             </div>
-            <div class="form-group">
+            <div class="form-group mb-3">
                 <label asp-for="AdministrateurId" class="control-label"></label>
                 <select asp-for="AdministrateurId" class="form-control" asp-items="ViewBag.AdministrateurId"></select>
                 <span asp-validation-for="AdministrateurId" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="MotDePasse" class="control-label"></label>
+                <input asp-for="MotDePasse" class="form-control" />
+                <span asp-validation-for="MotDePasse" class="text-danger"></span>
             </div>
             <div class="form-group mt-3">
                 <input type="submit" value="Save" class="btn btn-primary" />
@@ -53,9 +78,3 @@
 <div class="mt-3">
     <a asp-action="Index">Back to List</a>
 </div>
-
-@section Scripts {
-    @{
-        await Html.RenderPartialAsync("_ValidationScriptsPartial");
-    }
-}

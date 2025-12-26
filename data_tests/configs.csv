@@ -1,7 +1,3 @@
 Description,Valeur
-Année scolaire en cours,2024-2025
-Seuil de validation de l'UE,10
-Nombre maximum de crédits par semestre,30
-Semestres dans une année universitaire,2
-Durée maximale d'un diplôme en années,6
-Nombre de tentatives autorisées pour valider une matière,3
+MaxCredits,30
+PassMark,10

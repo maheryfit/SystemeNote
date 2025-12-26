@@ -20,7 +20,7 @@ namespace SystemeNote.Models
         [Column("credits")]
         public int Credits { get; set; }
 
-        public required ICollection<ParcoursEtude> ParcoursEtudes { get; set; }
+        public required ICollection<ParcoursEtude> ParcoursEtudes { get; set; }= new List<ParcoursEtude>();
     }
 
 }

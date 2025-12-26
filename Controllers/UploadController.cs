@@ -29,7 +29,7 @@ namespace SystemeNote.Controllers
         {
             ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion");
             ViewData["AdministrateurId"] = new SelectList(_context.Administrateurs, "Id", "NomAdmin");
-            ViewData["PlanifSemestreIdy"] = new SelectList(_context.PlanifSemestres, "Id", "NomPlanifSemestre");
+            ViewData["PlanifSemestreId"] = new SelectList(_context.PlanifSemestres, "Id", "NomPlanifSemestre");
             return View();
         }
 
@@ -68,7 +68,7 @@ namespace SystemeNote.Controllers
             });
 
             TempData["Message"] = result;
-            return RedirectToAction("Index", "Students");
+            return RedirectToAction("Index", "Etudiant");
         }
         #endregion
 
@@ -150,7 +150,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Matieres.Add(new Matiere { NomMatiere = nomMatiere, CodeMatiere = codeMatiere, ParcoursEtudes = new List<ParcoursEtude>() });
             });
             TempData["Message"] = result;
-            return RedirectToPage("Index", "Matieres");
+            return RedirectToAction("Index", "Matieres");
         }
         #endregion
 
@@ -231,6 +231,264 @@ namespace SystemeNote.Controllers
         }
         #endregion
 
+        #region UniteEnseignements
+        public IActionResult UploadUniteEnseignements() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadUniteEnseignements(IFormFile file)
+        {
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 2) throw new Exception("Le fichier CSV doit contenir 2 colonnes : CodeUniteEnseignement, Credits");
+                var code = cols[0];
+                if (string.IsNullOrWhiteSpace(code)) return;
+                var credits = int.Parse(cols[1]);
+
+                var exists = await _context.UniteEnseignements.AnyAsync(u => u.CodeUniteEnseignement == code);
+                if (!exists)
+                {
+                    _context.UniteEnseignements.Add(new UniteEnseignement { CodeUniteEnseignement = code, Credits = credits, ParcoursEtudes = new List<ParcoursEtude>() });
+                }
+            });
+            TempData["Message"] = result;
+            return RedirectToAction("Index", "UniteEnseignements");
+        }
+        #endregion
+
+        #region ParcoursEtud`es
+        public IActionResult UploadParcoursEtudes() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadParcoursEtudes(IFormFile file, bool createMissingMatieres)
+        {
+            var matieres = await _context.Matieres.ToDictionaryAsync(m => m.CodeMatiere, m => m.Id);
+            var newMatieres = new Dictionary<string, Matiere>(); // Cache pour les nouvelles matières créées dans ce lot
+
+            var ues = await _context.UniteEnseignements.ToDictionaryAsync(u => u.CodeUniteEnseignement, u => u.Id);
+            var planifs = await _context.PlanifSemestres.ToDictionaryAsync(p => p.NomPlanifSemestre, p => p.Id);
+
+            var errors = new List<string>();
+            var addedParcoursKeys = new HashSet<string>(); // Pour éviter les doublons dans le fichier CSV lui-même
+
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 3) return;
+                var codeMatiere = cols[0];
+                var codeUE = cols[1];
+                var nomPlanif = cols[2];
+
+                // Vérifier si cette combinaison a déjà été traitée dans ce fichier
+                var key = $"{codeMatiere}|{codeUE}|{nomPlanif}";
+                if (addedParcoursKeys.Contains(key)) return;
+
+                var missing = new List<string>();
+
+                int? matiereId = null;
+                Matiere? newMatiereEntity = null;
+
+                if (matieres.TryGetValue(codeMatiere, out var existingId))
+                {
+                    matiereId = existingId;
+                }
+                else if (createMissingMatieres)
+                {
+                    // Vérifier si on l'a déjà créée dans ce lot
+                    if (newMatieres.TryGetValue(codeMatiere, out var m))
+                    {
+                        newMatiereEntity = m;
+                    }
+                    else
+                    {
+                        newMatiereEntity = new Matiere
+                        {
+                            CodeMatiere = codeMatiere,
+                            NomMatiere = codeMatiere, // On utilise le code comme nom par défaut
+                            ParcoursEtudes = new List<ParcoursEtude>()
+                        };
+                        _context.Matieres.Add(newMatiereEntity);
+                        newMatieres[codeMatiere] = newMatiereEntity;
+                    }
+                }
+                else
+                {
+                    missing.Add($"Matière '{codeMatiere}'");
+                }
+
+                if (!ues.TryGetValue(codeUE, out var ueId)) missing.Add($"UE '{codeUE}'");
+                if (!planifs.TryGetValue(nomPlanif, out var planifId)) missing.Add($"Planif '{nomPlanif}'");
+
+                if (missing.Any())
+                {
+                    errors.Add($"Ligne ignorée ({codeMatiere}/{codeUE}) : Introuvable -> {string.Join(", ", missing)}");
+                    return;
+                }
+
+                // Si c'est une nouvelle matière, le parcours n'existe pas encore en base.
+                // Si c'est une matière existante, on vérifie en base.
+                bool exists = false;
+                if (matiereId.HasValue)
+                {
+                    exists = await _context.ParcoursEtudes.AnyAsync(p => p.MatiereId == matiereId.Value && p.UniteEnseignementId == ueId && p.PlanifSemestreId == planifId);
+                }
+
+                if (!exists)
+                {
+                    var parcours = new ParcoursEtude
+                    {
+                        UniteEnseignementId = ueId,
+                        PlanifSemestreId = planifId,
+                        NoteEtudiants = new List<NoteEtudiant>()
+                    };
+
+                    if (matiereId.HasValue)
+                    {
+                        parcours.MatiereId = matiereId.Value;
+                    }
+                    else
+                    {
+                        parcours.Matiere = newMatiereEntity!;
+                    }
+
+                    _context.ParcoursEtudes.Add(parcours);
+                    addedParcoursKeys.Add(key);
+                }
+            });
+
+            if (errors.Any())
+            {
+                result += "<br/><div class='text-danger mt-2'><strong>Erreurs rencontrées :</strong><br/>" + string.Join("<br/>", errors.Take(20));
+                if (errors.Count > 20) result += $"<br/>... et {errors.Count - 20} autres erreurs.";
+                result += "</div>";
+            }
+
+            TempData["Message"] = result;
+            return RedirectToAction("Index","ParcoursEtudes");
+        }
+        #endregion
+
+        #region NoteEtudiants
+        public IActionResult UploadNoteEtudiants() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadNoteEtudiants(IFormFile file, bool createMissingStudents)
+        {
+            var etudiants = await _context.Etudiants.ToDictionaryAsync(e => e.Matricule, e => e.Id);
+            var newEtudiants = new Dictionary<string, Etudiant>();
+
+            int? defaultAdminId = null;
+            if (createMissingStudents)
+            {
+                var admin = await _context.Administrateurs.FirstOrDefaultAsync();
+                if (admin != null) defaultAdminId = admin.Id;
+            }
+
+            // Création d'un dictionnaire pour rechercher rapidement les ParcoursEtudes
+            // Clé composite : "CodeMatiere|CodeUE|NomPlanif"
+            var parcoursMap = await _context.ParcoursEtudes
+               .Include(p => p.Matiere)
+               .Include(p => p.UniteEnseignement)
+               .Include(p => p.PlanifSemestre)
+               .ToDictionaryAsync(p => $"{p.Matiere!.CodeMatiere}|{p.UniteEnseignement!.CodeUniteEnseignement}|{p.PlanifSemestre!.NomPlanifSemestre}", p => p);
+
+            var errors = new List<string>();
+
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 5) return;
+                var matricule = cols[0];
+                var codeMatiere = cols[1];
+                var codeUE = cols[2];
+                var nomPlanif = cols[3];
+                if (!double.TryParse(cols[4], NumberStyles.Any, CultureInfo.InvariantCulture, out var note)) return;
+
+                if (note < 0 || note > 20)
+                {
+                    errors.Add($"Note invalide ({note}) pour {matricule} : doit être entre 0 et 20.");
+                    return;
+                }
+
+                var key = $"{codeMatiere}|{codeUE}|{nomPlanif}";
+                if (!parcoursMap.TryGetValue(key, out var parcours))
+                {
+                    errors.Add($"Parcours introuvable pour : {codeMatiere} / {codeUE} / {nomPlanif}");
+                    return;
+                }
+
+                int? etudiantId = null;
+                Etudiant? newEtudiant = null;
+
+                if (etudiants.TryGetValue(matricule, out var existingId))
+                {
+                    etudiantId = existingId;
+                }
+                else if (createMissingStudents && defaultAdminId.HasValue)
+                {
+                    if (newEtudiants.TryGetValue(matricule, out var cached))
+                    {
+                        newEtudiant = cached;
+                    }
+                    else
+                    {
+                        newEtudiant = new Etudiant
+                        {
+                            Matricule = matricule,
+                            Nom = matricule, // Valeur par défaut
+                            Prenom = "Inconnu", // Valeur par défaut
+                            DateNaissance = DateTime.Now,
+                            Genre = 1,
+                            IsActif = true,
+                            DateAdmission = DateTime.Now,
+                            AdministrateurId = defaultAdminId.Value,
+                            PlanifSemestreId = parcours.PlanifSemestreId,
+                            PromotionId = parcours.PlanifSemestre!.PromotionId,
+                            MotDePasse = "password123"
+                        };
+                        _context.Etudiants.Add(newEtudiant);
+                        newEtudiants[matricule] = newEtudiant;
+                    }
+                }
+                else
+                {
+                    errors.Add($"Étudiant inconnu : {matricule}");
+                    return;
+                }
+
+                bool exists = false;
+                if (etudiantId.HasValue)
+                {
+                    exists = await _context.NoteEtudiants.AnyAsync(n => n.EtudiantId == etudiantId.Value && n.ParcoursEtudiantId == parcours.Id);
+                }
+
+                if (!exists)
+                {
+                    var noteEtudiant = new NoteEtudiant
+                    {
+                        ParcoursEtudiantId = parcours.Id,
+                        Note = note,
+                        PromotionId = parcours.PlanifSemestre!.PromotionId
+                    };
+
+                    if (etudiantId.HasValue) noteEtudiant.EtudiantId = etudiantId.Value;
+                    else noteEtudiant.Etudiant = newEtudiant!;
+
+                    _context.NoteEtudiants.Add(noteEtudiant);
+                }
+            });
+
+            if (errors.Any())
+            {
+                result += "<br/><div class='text-danger mt-2'><strong>Erreurs rencontrées :</strong><br/>" + string.Join("<br/>", errors.Take(20));
+                if (errors.Count > 20) result += $"<br/>... et {errors.Count - 20} autres erreurs.";
+                result += "</div>";
+            }
+
+            TempData["Message"] = result;
+            return RedirectToAction("Index", "NoteEtudiants");
+        }
+        #endregion
 
         private static DateTime ParseDate(string s)
         {

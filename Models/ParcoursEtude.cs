@@ -23,15 +23,15 @@ namespace SystemeNote.Models
         public int PlanifSemestreId { get; set; }
 
         [ForeignKey("MatiereId")]
-        public virtual required Matiere Matiere { get; set; }
+        public virtual Matiere? Matiere { get; set; }
 
         [ForeignKey("UniteEnseignementId")]
-        public virtual required UniteEnseignement UniteEnseignement { get; set; }
+        public virtual UniteEnseignement? UniteEnseignement { get; set; }
 
         [ForeignKey("PlanifSemestreId")]
-        public virtual required PlanifSemestre PlanifSemestre { get; set; }
+        public virtual PlanifSemestre? PlanifSemestre { get; set; }
 
-        public required ICollection<NoteEtudiant> NoteEtudiants { get; set; }
+        public required ICollection<NoteEtudiant> NoteEtudiants { get; set; }=new List<NoteEtudiant>();
     }
 
 }

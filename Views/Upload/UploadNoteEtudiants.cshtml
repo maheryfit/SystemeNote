@@ -1,0 +1,21 @@
+@{
+    ViewData["Title"] = "Importer Notes Étudiants";
+}
+
+<h2>Importer Notes Étudiants</h2>
+
+<form asp-action="UploadNoteEtudiants" enctype="multipart/form-data" method="post">
+    <div class="form-group mb-3">
+        <label>Fichier CSV (Matricule, CodeMatiere, CodeUniteEnseignement, NomPlanifSemestre, Note)</label>
+        <input type="file" name="file" class="form-control" required />
+    </div>
+    <div class="form-check mb-3">
+        <input class="form-check-input" type="checkbox" id="createMissingStudents" name="createMissingStudents" value="true">
+        <label class="form-check-label" for="createMissingStudents">Créer automatiquement les étudiants manquants (avec des valeurs par défaut)</label>
+    </div>
+    <button type="submit" class="btn btn-primary">Importer</button>
+</form>
+
+<div class="mt-3">
+    <a asp-action="Index">Retour</a>
+</div>

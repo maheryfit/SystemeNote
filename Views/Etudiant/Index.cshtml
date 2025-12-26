@@ -1,4 +1,4 @@
-@model IEnumerable<SystemeNote.Models.Etudiant>
+@model SystemeNote.Utils.PaginatedList<SystemeNote.Models.Etudiant>
 
 @{
     ViewData["Title"] = "Student List";
@@ -8,22 +8,38 @@
 
 <p>
     <a asp-action="Create" class="btn btn-primary">Create New</a>
-    <a asp-controller="Upload" asp-action="Index" class="btn btn-secondary">Import Students</a>
+    <a asp-controller="Upload" asp-action="UploadStudents" class="btn btn-secondary">Import Students</a>
 </p>
+
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            Find by name, firstname or matricule:
+            <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" />
+            <input type="submit" value="Search" class="btn btn-dark btn-sm" /> |
+            <a asp-action="Index">Back to Full List</a>
+        </p>
+    </div>
+</form>
+
 <table class="table">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.Nom)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["NameSortParm"]"
+                    asp-route-currentFilter="@ViewData["CurrentFilter"]"> Nom</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Prenom)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["FirstNameSortParm"]"
+                    asp-route-currentFilter="@ViewData["CurrentFilter"]">Prenom</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Matricule)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["MatriculeSortParm"]"
+                    asp-route-currentFilter="@ViewData["CurrentFilter"]">Matricule</a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Promotion)
+                <a asp-action="Index" asp-route-sortOrder="@ViewData["PromotionSortParm"]"
+                    asp-route-currentFilter="@ViewData["CurrentFilter"]">Promotion</a>
             </th>
             <th></th>
         </tr>
@@ -33,7 +49,9 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Nom)
+                    <a asp-action="AcademicRecord" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.Nom)
+                    </a>
                 </td>
                 <td>
                     @Html.DisplayFor(modelItem => item.Prenom)
@@ -53,3 +71,17 @@
         }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex - 1)" asp-route-currentFilter="@ViewData["CurrentFilter"]"
+    class="btn btn-default @prevDisabled">
+    Previous
+</a>
+<a asp-action="Index" asp-route-pageNumber="@(Model.PageIndex + 1)" asp-route-currentFilter="@ViewData["CurrentFilter"]"
+    class="btn btn-default @nextDisabled">
+    Next
+</a>

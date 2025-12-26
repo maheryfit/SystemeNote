@@ -11,11 +11,20 @@ namespace SystemeNote.Controllers
         private readonly AppDbContext _context;
         public NoteEtudiantsController(AppDbContext context) { _context = context; }
 
-        public async Task<IActionResult> Index() => View(await _context.NoteEtudiants.Include(n => n.Etudiant).Include(n => n.ParcoursEtude)!.ThenInclude(p => p.Matiere).Include(n => n.Promotion).ToListAsync());
+        public async Task<IActionResult> Index() => View(
+            await _context.NoteEtudiants.Include(n => n.Etudiant)
+                .Include(n => n.ParcoursEtude)!
+                .ThenInclude(p => p.Matiere).
+                Include(n => n.Promotion).ToListAsync());
 
         public async Task<IActionResult> Details(int? id) { if (id == null) return NotFound(); var item = await _context.NoteEtudiants.Include(n => n.Etudiant).Include(n => n.ParcoursEtude).Include(n => n.Promotion).FirstOrDefaultAsync(m => m.Id == id); if (item == null) return NotFound(); return View(item); }
 
-        public IActionResult Create() { ViewData["EtudiantId"] = new SelectList(_context.Etudiants, "Id", "Matricule"); ViewData["ParcoursEtudiantId"] = new SelectList(_context.ParcoursEtudes, "Id", "Id"); ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion"); return View(); }
+        public IActionResult Create()
+        {
+            ViewData["EtudiantId"] = new SelectList(_context.Etudiants, "Id", "Matricule");
+            ViewData["ParcoursEtudiantId"] = new SelectList(_context.ParcoursEtudes, "Id", "Id");
+            ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion"); return View();
+        }
 
         [HttpPost]
         [ValidateAntiForgeryToken]

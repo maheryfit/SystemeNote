@@ -15,7 +15,7 @@ namespace SystemeNote.Models
         [Column("etudiant_id")]
         public int EtudiantId { get; set; }
         [ForeignKey("EtudiantId")]
-        public virtual required Etudiant Etudiant { get; set; }
+        public virtual Etudiant? Etudiant { get; set; }
 
         [Required]
         [Column("parcours_etudiant_id")]
@@ -32,10 +32,10 @@ namespace SystemeNote.Models
 
 
         [ForeignKey("ParcoursEtudiantId")]
-        public virtual required ParcoursEtude ParcoursEtude { get; set; }
+        public virtual  ParcoursEtude? ParcoursEtude { get; set; }
 
         [ForeignKey("PromotionId")]
-        public virtual required Promotion Promotion { get; set; }
+        public virtual  Promotion? Promotion { get; set; }
     }
 
 }
