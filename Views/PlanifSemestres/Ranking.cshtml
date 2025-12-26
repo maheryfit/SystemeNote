@@ -92,8 +92,7 @@
 
 <div class="mt-3">
     <a asp-action="Index" class="btn btn-secondary">Retour à la liste des planifications</a>
-    <a asp-action="ExportToExcel" asp-route-id="@Model.PlanifSemestre.Id" class="btn btn-success">Exporter vers
-        Excel</a>
+    <!-- Export Excel removed -->
     <a asp-action="ExportToPdf" asp-route-id="@Model.PlanifSemestre.Id" class="btn btn-danger">Exporter vers PDF</a>
 </div>
 
@@ -129,19 +128,19 @@
             // 2. Données pour le graphique de distribution des moyennes
             @{
                     var gradeBuckets = new Dictionary<string, int> { { "0-8", 0 }, { "8-10", 0 }, { "10-12", 0 }, { "12-14", 0 }, { "14-16", 0 }, { "16+", 0 } };
-                    foreach (var student in Model.StudentRankings)
+                            foreach (var student in Model.StudentRankings)
                     {
                         var avg = student.OverallAverage;
                         if (avg < 8) gradeBuckets["0-8"]++;
-                            else if (avg < 10) gradeBuckets["8-10"]++;
-                            else if (avg < 12) gradeBuckets["10-12"]++;
-                            else if (avg < 14) gradeBuckets["12-14"]++;
-                            else if (avg < 16) gradeBuckets["14-16"]++;
+                                        else if (avg < 10) gradeBuckets["8-10"]++;
+                                        else if (avg < 12) gradeBuckets["10-12"]++;
+                                        else if (avg < 14) gradeBuckets["12-14"]++;
+                                        else if (avg < 16) gradeBuckets["14-16"]++;
                         else gradeBuckets["16+"]++;
                     }
                 }
 
-            const gradeLabels = @Html.Raw(Json.Serialize(gradeBuckets.Keys));
+                const gradeLabels = @Html.Raw(Json.Serialize(gradeBuckets.Keys));
             const gradeData = @Html.Raw(Json.Serialize(gradeBuckets.Values));
 
             const gradesCtx = document.getElementById('gradesDistributionChart').getContext('2d');

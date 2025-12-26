@@ -8,6 +8,8 @@ using SystemeNote.Data;
 using SystemeNote.Utils; // Ajout de cette directive using
 using SystemeNote.ViewModels; // Ajout de cette directive using pour les ViewModels si nécessaire
 using SystemeNote.Models;
+using Rotativa.AspNetCore;
+using System.IO;
 
 namespace SystemeNote.Controllers
 {
@@ -203,12 +205,81 @@ namespace SystemeNote.Controllers
                 selectedPlanifSemestre is PlanifSemestre ps3 ? ps3.OptionEtudeId : null);
         }
 
-        // Les actions Ranking, ExportToExcel et ExportToPdf devraient être ici,
-        // mais elles sont déjà présentes dans le contexte fourni.
-        // Je ne les répète pas pour éviter la redondance.
-        // Assurez-vous qu'elles sont bien dans votre fichier PlanifSemestresController.cs
-        // et qu'elles utilisent le même ViewModel et la même logique de récupération de données.
+        public async Task<IActionResult> Ranking(int? id)
+        {
+            if (id == null) return NotFound();
+            var viewModel = await GetRankingViewModelAsync(id.Value);
+            if (viewModel == null) return NotFound();
+            return View(viewModel);
+        }
 
-        // ... (votre code existant pour Ranking, ExportToExcel, ExportToPdf) ...
+        // Excel export removed per request (annulation de l'export Excel)
+
+        [Obsolete]
+        public async Task<IActionResult> ExportToPdf(int? id)
+        {
+            if (id == null) return NotFound();
+            var viewModel = await GetRankingViewModelAsync(id.Value);
+            if (viewModel == null) return NotFound();
+
+            string pdfName = $"Classement-{viewModel.PlanifSemestre.NomPlanifSemestre}-{DateTime.Now:yyyyMMdd}.pdf";
+            var pdfResult = new ViewAsPdf("RankingPdf", viewModel) { FileName = pdfName };
+
+            // Définir explicitement le chemin vers wkhtmltopdf pour éviter l'erreur de configuration globale manquante
+            pdfResult.WkhtmltopdfPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Rotativa");
+
+            return pdfResult;
+        }
+
+        private async Task<SemesterRankingViewModel?> GetRankingViewModelAsync(int id)
+        {
+            var planifSemestre = await _context.PlanifSemestres.FindAsync(id);
+            if (planifSemestre == null) return null;
+
+            var notes = await _context.NoteEtudiants
+                .Where(n => n.ParcoursEtude!.PlanifSemestreId == id)
+                .Include(n => n.Etudiant)
+                .Include(n => n.ParcoursEtude).ThenInclude(p => p!.Matiere)
+                .Include(n => n.ParcoursEtude).ThenInclude(p => p!.UniteEnseignement)
+                .ToListAsync();
+
+            var studentAverages = new Dictionary<Etudiant, double>();
+            var studentUeGrades = new Dictionary<Etudiant, List<UeGradeRecord>>();
+
+            foreach (var studentGroup in notes.GroupBy(n => n.Etudiant))
+            {
+                var etudiant = studentGroup.Key;
+                if (etudiant == null) continue;
+                var ueRecords = new List<UeGradeRecord>();
+                var ueAverages = new List<double>();
+
+                foreach (var ueGroup in studentGroup.GroupBy(n => n.ParcoursEtude!.UniteEnseignement))
+                {
+                    var ue = ueGroup.Key;
+                    if (ue == null) continue;
+                    var maxNotes = ueGroup.GroupBy(n => n.ParcoursEtude!.Matiere).Select(g => g.Select(n => n.Note).DefaultIfEmpty(0).Max());
+                    var avg = maxNotes.Any() ? maxNotes.Average() : 0;
+                    ueAverages.Add(avg);
+                    ueRecords.Add(new UeGradeRecord { UeCode = ue.CodeUniteEnseignement, UeName = ue.CodeUniteEnseignement, UeAverage = avg });
+                }
+                studentAverages[etudiant] = ueAverages.Any() ? ueAverages.Average() : 0;
+                studentUeGrades[etudiant] = ueRecords;
+            }
+
+            var rankings = studentAverages.OrderByDescending(x => x.Value).Select((x, i) => new StudentRankingRecord
+            {
+                Rank = i + 1,
+                Etudiant = x.Key,
+                OverallAverage = x.Value,
+                Status = x.Value >= 10 ? "Admis" : "Ajourné",
+                UeGrades = studentUeGrades[x.Key].OrderBy(u => u.UeCode).ToList()
+            }).ToList();
+
+            var total = rankings.Count;
+            var avgClass = total > 0 ? rankings.Average(r => r.OverallAverage) : 0;
+            var variance = total > 1 ? rankings.Sum(r => Math.Pow(r.OverallAverage - avgClass, 2)) / (total - 1) : 0;
+
+            return new SemesterRankingViewModel { PlanifSemestre = planifSemestre, StudentRankings = rankings, Stats = new SemesterStatistics { TotalStudents = total, AdmisCount = rankings.Count(r => r.Status == "Admis"), AjourneCount = rankings.Count(r => r.Status == "Ajourné"), ClassAverage = avgClass, GradeVariance = variance } };
+        }
     }
 }

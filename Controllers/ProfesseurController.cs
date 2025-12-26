@@ -58,6 +58,7 @@ namespace SystemeNote.Controllers
                     var averages = g.Select(item => item.Average).ToList();
                     var total = averages.Count;
                     var admis = averages.Count(a => a >= 10);
+                    var moyenne = total > 0 ? averages.Average() : 0;
                     return new SemestreStats
                     {
                         PlanifSemestreId = g.Key.Id,
@@ -67,6 +68,7 @@ namespace SystemeNote.Controllers
                         Ajournes = total - admis,
                         PourcentageAdmis = total > 0 ? (double)admis / total * 100 : 0,
                         PourcentageAjournes = total > 0 ? (double)(total - admis) / total * 100 : 0,
+                        MoyenneClasse = moyenne
                     };
                 })
                 .OrderBy(s => s.NomPlanifSemestre)

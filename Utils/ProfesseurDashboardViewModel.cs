@@ -16,6 +16,7 @@ namespace SystemeNote.ViewModels
         public int Ajournes { get; set; }
         public double PourcentageAdmis { get; set; }
         public double PourcentageAjournes { get; set; }
+        public double MoyenneClasse { get; set; }
     }
 
     public class PromotionProgress

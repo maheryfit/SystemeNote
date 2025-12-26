@@ -15,7 +15,7 @@ namespace SystemeNote.Models
         [Column("etudiant_id")]
         public int EtudiantId { get; set; }
         [ForeignKey("EtudiantId")]
-        public virtual required Etudiant Etudiant { get; set; }
+        public virtual Etudiant? Etudiant { get; set; }
 
         [Required]
         [Column("parcours_etudiant_id")]

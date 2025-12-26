@@ -1,10 +1,38 @@
 @model SystemeNote.Models.ParcoursEtude
+
 @{
     ViewData["Title"] = "Create ParcoursEtude";
 }
-<h4>@ViewData["Title"]</h4>
-<form asp-action="Create" method="post">
-    <!-- Fields for ParcoursEtude -->
-    <button type="submit">Create</button>
+
+<h1>Create</h1>
+
+<h4>ParcoursEtude</h4>
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Create">'
+            
+            <div asp-validation-summary="All" class="text-danger"></div>
+            <div class="form-group mb-3">
+                <label asp-for="PlanifSemestreId" class="control-label">Planification Semestre</label>
+                <select asp-for="PlanifSemestreId" class="form-control" asp-items="ViewBag.PlanifSemestreId"></select>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="UniteEnseignementId" class="control-label">Unité d'Enseignement</label>
+                <select asp-for="UniteEnseignementId" class="form-control"
+                    asp-items="ViewBag.UniteEnseignementId"></select>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="MatiereId" class="control-label">Matière</label>
+                <select asp-for="MatiereId" class="form-control" asp-items="ViewBag.MatiereId"></select>
+            </div>
+            <div class="form-group">
+                <input type="submit" value="Create" class="btn btn-primary" />
+            </div>
+        </form>
+    </div>
+</div>
+
+<div>
     <a asp-action="Index">Cancel</a>
-</form>
+</div>
