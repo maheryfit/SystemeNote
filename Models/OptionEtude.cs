@@ -16,7 +16,7 @@ namespace SystemeNote.Models
         [Column("nom_option_etude")]
         public required string NomOptionEtude { get; set; }
 
-        public required ICollection<PlanifSemestre> PlanifSemestres { get; set; }
+        public virtual ICollection<PlanifSemestre>? PlanifSemestres { get; set; }
 
         public OptionEtude()
         {

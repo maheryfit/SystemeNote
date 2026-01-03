@@ -18,7 +18,7 @@ namespace SystemeNote.Utils
 
             try
             {
-                using var reader = new StreamReader(file.OpenReadStream());
+                using var reader = new StreamReader(file.OpenReadStream(), System.Text.Encoding.GetEncoding("Windows-1252"), detectEncodingFromByteOrderMarks: true);
                 await reader.ReadLineAsync(); // Ignorer l'en-tête
 
                 while (!reader.EndOfStream)

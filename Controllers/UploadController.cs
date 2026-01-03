@@ -490,6 +490,49 @@ namespace SystemeNote.Controllers
         }
         #endregion
 
+        #region PlanifSemestres
+        public IActionResult UploadPlanifSemestres() => View();
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadPlanifSemestres(IFormFile file)
+        {
+            var semestres = await _context.Semestres.ToDictionaryAsync(s => s.CodeSemestre, s => s.Id);
+            var options = await _context.OptionEtudes.ToDictionaryAsync(o => o.NomOptionEtude, o => o.Id);
+            var promotions = await _context.Promotions.ToDictionaryAsync(p => p.CodePromotion, p => p.Id);
+
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 7) throw new Exception("Le fichier CSV doit contenir 7 colonnes : NomPlanifSemestre, DateDebut, DateFin, CodeSemestre, NomOptionEtude, TotalCredit, CodePromotion");
+                var nomPlanif = cols[0];
+                var dateDebut = ParseDate(cols[1]);
+                var dateFin = ParseDate(cols[2]);
+                var codeSemestre = cols[3];
+                var nomOption = cols[4];
+                var totalCredit = ParseInt(cols[5]);
+                var codePromotion = cols[6];
+                if (!semestres.TryGetValue(codeSemestre, out var semestreId)) throw new Exception($"Semestre '{codeSemestre}' non trouvé.");
+                if (!options.TryGetValue(nomOption, out var optionId)) throw new Exception($"Option d'étude '{nomOption}' non trouvée.");
+                if (!promotions.TryGetValue(codePromotion, out var promotionId)) throw new Exception($"Promotion '{codePromotion}' non trouvée.");
+                var exists = await _context.PlanifSemestres.AnyAsync(p => p.NomPlanifSemestre == nomPlanif);
+                if (!exists)
+                {
+                    _context.PlanifSemestres.Add(new PlanifSemestre
+                    {
+                        NomPlanifSemestre = nomPlanif,
+                        SemestreId = semestreId,
+                        OptionEtudeId = optionId,
+                        TotalCredit = totalCredit,
+                        PromotionId = promotionId,
+                        DateDebut = dateDebut,
+                        DateFin = dateFin
+                    });
+                }
+            });
+            TempData["Message"] = result;
+            return RedirectToAction("Index", "PlanifSemestres");
+        }
+        #endregion
+
         private static DateTime ParseDate(string s)
         {
             if (DateTime.TryParseExact(s, new[] { "yyyy-MM-dd", "yyyy/MM/dd", "dd/MM/yyyy", "MM/dd/yyyy" }, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt))

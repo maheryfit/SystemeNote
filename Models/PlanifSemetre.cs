@@ -48,11 +48,11 @@ namespace SystemeNote.Models
         public virtual OptionEtude? OptionEtude { get; set; }
 
         [ForeignKey("PromotionId")]
-        public virtual  Promotion? Promotion { get; set; }
+        public virtual Promotion? Promotion { get; set; }
 
-        public  required ICollection<ParcoursEtude> ParcoursEtudes { get; set; }= new List<ParcoursEtude>();
-        public  ICollection<Etudiant> Etudiants { get; set; }=new List<Etudiant>();
-        public  ICollection<HistoriqueSemestreEtudiant> HistoriqueSemestreEtudiants { get; set; } = new List<HistoriqueSemestreEtudiant>();
+        public ICollection<ParcoursEtude> ParcoursEtudes { get; set; }= new List<ParcoursEtude>();
+        public ICollection<Etudiant> Etudiants { get; set; }=new List<Etudiant>();
+        public ICollection<HistoriqueSemestreEtudiant> HistoriqueSemestreEtudiants { get; set; } = new List<HistoriqueSemestreEtudiant>();
     
     }
 

@@ -80,7 +80,7 @@ namespace SystemeNote.Controllers
         // POST: OptionEtudes/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,NomOption")] OptionEtude optionEtude)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,NomOptionEtude")] OptionEtude optionEtude)
         {
             if (id != optionEtude.Id)
             {
