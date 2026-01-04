@@ -80,7 +80,6 @@ namespace SystemeNote.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,CodeSemestre,NomSemestre,DiplomeId")] Semestre semestre)
         {
-            Console.WriteLine(semestre.CodeSemestre, semestre.NomSemestre);
             if (ModelState.IsValid)
             {
                 _context.Add(semestre);

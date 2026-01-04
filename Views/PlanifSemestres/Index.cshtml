@@ -68,7 +68,11 @@
         @foreach (var item in Model)
         {
             <tr>
-                <td>@item.NomPlanifSemestre</td>
+                <td>
+                    <a asp-action="Ranking" asp-route-id="@item.Id">
+                        @Html.DisplayFor(modelItem => item.NomPlanifSemestre)
+                    </a>
+                </td>
                 <td>@item.Semestre?.NomSemestre</td>
                 <td>@item.OptionEtude?.NomOptionEtude</td>
                 <td>@item.Promotion?.NomPromotion</td>

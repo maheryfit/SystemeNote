@@ -1,28 +1,52 @@
-@model IEnumerable<SystemeNote.Models.ParcoursEtude>
+@using SystemeNote.Utils
+@model PaginatedList<SystemeNote.Models.ParcoursEtude>
 
 @{
-    ViewData["Title"] = "Parcours Etudes";
+    ViewData["Title"] = ViewData["Title"] ?? "Parcours d'Étude";
 }
 
 <h1>@ViewData["Title"]</h1>
 
+<form asp-action="Index" method="get">
+    <div class="form-actions no-color">
+        <p>
+            <input type="text" name="SearchString" value="@ViewData["CurrentFilter"]" placeholder="Rechercher..." class="form-control" style="width: 300px; display: inline-block;" />
+            <input type="submit" value="Rechercher" class="btn btn-primary" />
+            <a asp-action="Index" class="btn btn-secondary">Réinitialiser</a>
+        </p>
+    </div>
+</form>
+
 <p>
-    <a asp-action="Create" class="btn btn-primary">Create New</a>
-    <a asp-controller="Upload" asp-action="UploadParcoursEtudes" class="btn btn-secondary">Import Parcours d'études</a>
+    <a asp-action="Create" class="btn btn-success">Créer Nouveau</a>
+    <a asp-action="UploadParcoursEtudes" asp-controller="Upload" class="btn btn-info">Import Parcours d'Étude</a>
 </p>
-<table class="table">
+
+<table class="table table-striped">
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.PlanifSemestre)
+                <a asp-action="Index" 
+                   asp-route-sortOrder="@ViewData["MatiereSortParm"]" 
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    Matière
+                </a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.UniteEnseignement)
+                <a asp-action="Index" 
+                   asp-route-sortOrder="@ViewData["UESortParm"]" 
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    Unité d'Enseignement
+                </a>
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.Matiere)
+                <a asp-action="Index" 
+                   asp-route-sortOrder="@ViewData["PlanifSortParm"]" 
+                   asp-route-currentFilter="@ViewData["CurrentFilter"]">
+                    Planification Semestre
+                </a>
             </th>
-            <th></th>
+            <th>Actions</th>
         </tr>
     </thead>
     <tbody>
@@ -30,20 +54,64 @@
         {
             <tr>
                 <td>
-                    @Html.DisplayFor(modelItem => item.PlanifSemestre.NomPlanifSemestre)
+                    <strong>@item.Matiere?.NomMatiere</strong><br />
+                    <small class="text-muted">@item.Matiere?.CodeMatiere</small>
                 </td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.UniteEnseignement.CodeUniteEnseignement)
+                    @item.UniteEnseignement?.CodeUniteEnseignement
+                    <small class="text-muted">(@item.UniteEnseignement?.Credits crédits)</small>
                 </td>
+                <td>@item.PlanifSemestre?.NomPlanifSemestre</td>
                 <td>
-                    @Html.DisplayFor(modelItem => item.Matiere.NomMatiere)
-                </td>
-                <td>
-                    <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
-                    <a asp-action="Details" asp-route-id="@item.Id">Details</a> |
-                    <a asp-action="Delete" asp-route-id="@item.Id">Delete</a>
+                    <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-warning">Modifier</a>
+                    <a asp-action="Details" asp-route-id="@item.Id" class="btn btn-sm btn-info">Détails</a>
+                    <a asp-action="Delete" asp-route-id="@item.Id" class="btn btn-sm btn-danger">Supprimer</a>
                 </td>
             </tr>
         }
     </tbody>
 </table>
+
+@{
+    var prevDisabled = !Model.HasPreviousPage ? "disabled" : "";
+    var nextDisabled = !Model.HasNextPage ? "disabled" : "";
+}
+
+<nav aria-label="Page navigation">
+    <ul class="pagination">
+        <li class="page-item @prevDisabled">
+            <a asp-action="Index"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-pageNumber="@(Model.PageIndex - 1)"
+               asp-route-searchString="@ViewData["CurrentFilter"]"
+               class="page-link">
+                Précédent
+            </a>
+        </li>
+        @for (int i = 1; i <= Model.TotalPages; i++)
+        {
+            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                <a asp-action="Index"
+                   asp-route-sortOrder="@ViewData["CurrentSort"]"
+                   asp-route-pageNumber="@i"
+                   asp-route-searchString="@ViewData["CurrentFilter"]"
+                   class="page-link">
+                    @i
+                </a>
+            </li>
+        }
+        <li class="page-item @nextDisabled">
+            <a asp-action="Index"
+               asp-route-sortOrder="@ViewData["CurrentSort"]"
+               asp-route-pageNumber="@(Model.PageIndex + 1)"
+               asp-route-searchString="@ViewData["CurrentFilter"]"
+               class="page-link">
+                Suivant
+            </a>
+        </li>
+    </ul>
+</nav>
+
+<p>
+    Page @Model.PageIndex sur @Model.TotalPages
+</p>

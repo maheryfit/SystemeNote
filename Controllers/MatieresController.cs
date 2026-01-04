@@ -11,7 +11,44 @@ namespace SystemeNote.Controllers
         private readonly AppDbContext _context;
         public MatieresController(AppDbContext context) { _context = context; }
 
-        public async Task<IActionResult> Index() => View(await _context.Matieres.ToListAsync());
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
+        {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+            ViewData["CodeSortParm"] = sortOrder == "code" ? "code_desc" : "code";
+
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["Title"] = "Liste des Matières";
+
+            var matieres = from m in _context.Matieres
+                           select m;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                matieres = matieres.Where(m =>
+                    m.NomMatiere.Contains(searchString) ||
+                    m.CodeMatiere.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    matieres = matieres.OrderByDescending(m => m.NomMatiere);
+                    break;
+                case "code":
+                    matieres = matieres.OrderBy(m => m.CodeMatiere);
+                    break;
+                case "code_desc":
+                    matieres = matieres.OrderByDescending(m => m.CodeMatiere);
+                    break;
+                default:
+                    matieres = matieres.OrderBy(m => m.NomMatiere);
+                    break;
+            }
+
+            int pageSize = 10;
+            return View(await PaginatedList<Matiere>.CreateAsync(matieres.AsNoTracking(), pageNumber ?? 1, pageSize));
+        }
 
         public async Task<IActionResult> Details(int? id) { if (id == null) return NotFound(); var item = await _context.Matieres.FirstOrDefaultAsync(m => m.Id == id); if (item == null) return NotFound(); return View(item); }
 

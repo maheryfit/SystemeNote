@@ -1,6 +1,13 @@
 NomMatiere,CodeMatiere
-Algorithmique,ALGO101
-Base de Données,BDD101
-Mathématiques,MATH101
-Anglais,ANG101
-Programmation C#,PRG102
+Programmation procédurale,INF101
+HTML et Introduction au Web,INF104
+Informatique de Base,INF107
+Arithmétique et nombres,MTH101
+Analyse mathématique,MTH102
+Techniques de communication,ORG101
+Bases de données relationnelles,INF102
+Bases de l'administration système,INF103
+Maintenance matériel et logiciel,INF105
+Compléments de programmation,INF106
+Calcul vectoriel et matriciel,MTH105
+Probabilité et Statistique,MTH103
