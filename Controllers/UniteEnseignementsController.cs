@@ -1,10 +1,11 @@
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
+using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
@@ -18,9 +19,40 @@ namespace SystemeNote.Controllers
         }
 
         // GET: UniteEnseignements
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
-            return View(await _context.UniteEnseignements.ToListAsync());
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["CodeSortParm"] = String.IsNullOrEmpty(sortOrder) ? "code_desc" : "";
+            ViewData["CreditSortParm"] = sortOrder == "credit" ? "credit_desc" : "credit";
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["Title"] = "Unités d'enseignement";
+
+            var uniteEnseignements = from u in _context.UniteEnseignements
+                                     select u;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                uniteEnseignements = uniteEnseignements.Where(u => u.CodeUniteEnseignement.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "code_desc":
+                    uniteEnseignements = uniteEnseignements.OrderByDescending(u => u.CodeUniteEnseignement);
+                    break;
+                case "credit":
+                    uniteEnseignements = uniteEnseignements.OrderBy(u => u.Credits);
+                    break;
+                case "credit_desc":
+                    uniteEnseignements = uniteEnseignements.OrderByDescending(u => u.Credits);
+                    break;
+                default:
+                    uniteEnseignements = uniteEnseignements.OrderBy(u => u.CodeUniteEnseignement);
+                    break;
+            }
+
+            int pageSize = 10;
+            return View(await PaginatedList<UniteEnseignement>.CreateAsync(uniteEnseignements.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
         // GET: UniteEnseignements/Details/5

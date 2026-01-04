@@ -15,6 +15,13 @@ namespace SystemeNote.Models
         [StringLength(255)]
         [Column("nom_option_etude")]
         public required string NomOptionEtude { get; set; }
+        
+        [Required]
+        [Column("diplome_id")]
+        public int DiplomeId { get; set; }
+
+        [ForeignKey("DiplomeId")]
+        public virtual Diplome? Diplome { get; set; }
 
         public virtual ICollection<PlanifSemestre>? PlanifSemestres { get; set; }
 

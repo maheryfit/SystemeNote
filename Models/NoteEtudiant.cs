@@ -29,8 +29,6 @@ namespace SystemeNote.Models
         [Column("promotion_id")]
         public int PromotionId { get; set; }
 
-
-
         [ForeignKey("ParcoursEtudiantId")]
         public virtual  ParcoursEtude? ParcoursEtude { get; set; }
 

@@ -1,4 +1,4 @@
 Matricule,Nom,Prenom,DateNaissance,Genre,IsActif,DateAdmission,MotDePasse
-E001,Doe,John,2000-01-15,1,true,2023-09-01,pass123
-E002,Smith,Jane,2001-05-20,2,true,2023-09-01,pass123
-E003,Brown,Bob,2000-11-30,1,true,2023-09-01,pass123
+E001,Doe,John,1/15/2000,1,TRUE,9/1/2023,pass123
+E002,Smith,Jane,5/20/2001,2,TRUE,9/1/2023,pass123
+E003,Brown,Bob,11/30/2000,1,TRUE,9/1/2023,pass123

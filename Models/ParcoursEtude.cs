@@ -1,9 +1,11 @@
 using System.ComponentModel.DataAnnotations.Schema;
 using System.ComponentModel.DataAnnotations;
+using Microsoft.EntityFrameworkCore;
 
 namespace SystemeNote.Models
 {
     [Table("parcours_etude")]
+    [Index(nameof(MatiereId), nameof(UniteEnseignementId), nameof(PlanifSemestreId), IsUnique = true)]
     public class ParcoursEtude
     {
         [Key]
@@ -31,7 +33,7 @@ namespace SystemeNote.Models
         [ForeignKey("PlanifSemestreId")]
         public virtual PlanifSemestre? PlanifSemestre { get; set; }
 
-        public required ICollection<NoteEtudiant> NoteEtudiants { get; set; }=new List<NoteEtudiant>();
+        public virtual ICollection<NoteEtudiant> NoteEtudiants { get; set; }=new List<NoteEtudiant>();
     }
 
 }

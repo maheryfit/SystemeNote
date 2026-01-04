@@ -129,7 +129,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Promotions.Add(new Promotion { NomPromotion = cols[0], DateCreation = DateOnly.Parse(cols[1]), CodePromotion = cols[2], DiplomeId = diplomeId });
             });
             TempData["Message"] = result;
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Promotions");
         }
         #endregion
 
@@ -217,14 +217,21 @@ namespace SystemeNote.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadOptionEtudes(IFormFile file)
         {
+            var diplomes = await _context.Diplomes.ToDictionaryAsync(m => m.NomDiplome, m => m.Id);
             var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
             {
-                if (cols.Length < 1) throw new Exception("Le fichier CSV doit contenir 1 colonne : NomOptionEtude");
+                if (cols.Length < 2) throw new Exception("Le fichier CSV doit contenir 2 colonne : NomOptionEtude, NomDiplome");
                 var nomOptionEtude = cols[0];
+                var nomDiplome = cols[1];
                 if (string.IsNullOrWhiteSpace(nomOptionEtude)) return;
-
+                if (!diplomes.TryGetValue(nomDiplome, out var diplomeId)) throw new Exception($"Diplôme '{nomDiplome}' non trouvé.");
                 var exists = await _context.OptionEtudes.AnyAsync(o => o.NomOptionEtude == nomOptionEtude);
-                if (!exists) _context.OptionEtudes.Add(new OptionEtude { NomOptionEtude = nomOptionEtude, PlanifSemestres = new List<PlanifSemestre>() });
+                if (!exists) _context.OptionEtudes.Add(new OptionEtude
+                    {
+                        NomOptionEtude = nomOptionEtude,
+                        DiplomeId = diplomeId,
+                        PlanifSemestres = new List<PlanifSemestre>()
+                    });
             });
             TempData["Message"] = result;
             return RedirectToAction("Index", "OptionEtudes");
@@ -256,7 +263,7 @@ namespace SystemeNote.Controllers
         }
         #endregion
 
-        #region ParcoursEtud`es
+        #region ParcoursEtudes
         public IActionResult UploadParcoursEtudes() => View();
 
         [HttpPost]

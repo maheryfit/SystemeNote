@@ -58,8 +58,6 @@
                            asp-action="Index">Semestres</a>
                         <a class="collapse-item" asp-area="" asp-controller="PlanifSemestres"
                            asp-action="Index">Planifications</a>
-                        <a class="collapse-item" asp-area="" asp-controller="OptionEtudes"
-                           asp-action="Index">Options d'étude</a>
                         <a class="collapse-item" asp-area="" asp-controller="UniteEnseignements"
                            asp-action="Index">Unités d'enseignement</a>
                     </div>
@@ -78,6 +76,10 @@
                     <div class="bg-white py-2 collapse-inner rounded">
                         <a class="collapse-item" asp-area="" asp-controller="Promotions"
                            asp-action="Index">Promotions</a>
+                        <a class="collapse-item" asp-area="" asp-controller="OptionEtudes"
+                           asp-action="Index">Options d'étude</a>
+                        <a class="collapse-item" asp-area="" asp-controller="ParcoursEtudes"
+                           asp-action="Index">Parcours d'étude</a>
                         <a class="collapse-item" asp-area="" asp-controller="Matieres"
                            asp-action="Index">Matières</a>
                         <a class="collapse-item" asp-area="" asp-controller="Configs"
@@ -128,16 +130,17 @@
                 </a>
                 <div id="collapseImport" class="collapse" aria-labelledby="headingImport" data-parent="#accordionSidebar">
                     <div class="bg-white py-2 collapse-inner rounded">
-                        <a asp-action="UploadStudents" asp-controller="Upload" class="collapse-item">Import Etudiants</a>
-                        <a asp-action="UploadDiplomes" asp-controller="Upload" class="collapse-item">Import Diplomes</a>
-                        <a asp-action="UploadPromotions" asp-controller="Upload" class="collapse-item">Import Promotions</a>
-                        <a asp-action="UploadMatieres" asp-controller="Upload" class="collapse-item">Import Matières</a>
-                        <a asp-action="UploadConfigs" asp-controller="Upload" class="collapse-item">Import Configurations</a>
-                        <a asp-action="UploadSemestres" asp-controller="Upload" class="collapse-item">Import Semesters</a>
-                        <a asp-action="UploadAdministrateurs" asp-controller="Upload" class="collapse-item">Import Administrators</a>
-                        <a asp-action="UploadOptionEtudes" asp-controller="Upload" class="collapse-item">Import Options d'étude</a>
-                        <a asp-action="UploadUniteEnseignements" asp-controller="Upload" class="collapse-item">Import Unités ensignements</a>
-                        <a asp-action="UploadPlanifSemestres" asp-controller="Upload" class="collapse-item">Import Planification semestres</a>
+                        <a asp-action="UploadStudents" asp-controller="Upload" class="collapse-item">Etudiants</a>
+                        <a asp-action="UploadDiplomes" asp-controller="Upload" class="collapse-item">Diplomes</a>
+                        <a asp-action="UploadPromotions" asp-controller="Upload" class="collapse-item">Promotions</a>
+                        <a asp-action="UploadMatieres" asp-controller="Upload" class="collapse-item">Matières</a>
+                        <a asp-action="UploadConfigs" asp-controller="Upload" class="collapse-item">Configurations</a>
+                        <a asp-action="UploadSemestres" asp-controller="Upload" class="collapse-item">Semesters</a>
+                        <a asp-action="UploadAdministrateurs" asp-controller="Upload" class="collapse-item">Administrators</a>
+                        <a asp-action="UploadOptionEtudes" asp-controller="Upload" class="collapse-item">Options d'étude</a>
+                        <a asp-action="UploadParcoursEtudes" asp-controller="Upload" class="collapse-item">Parcours d'étude</a>
+                        <a asp-action="UploadUniteEnseignements" asp-controller="Upload" class="collapse-item">Unités ensignements</a>
+                        <a asp-action="UploadPlanifSemestres" asp-controller="Upload" class="collapse-item">Planification semestres</a>
                     </div>
                 </div>
             </li>

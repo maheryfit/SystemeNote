@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SystemeNote.Models
 {
-    [Table("Diplome")]
+    [Table("diplome")]
     [Index(nameof(NomDiplome), IsUnique = true)]
     public class Diplome
     {
