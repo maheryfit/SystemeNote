@@ -1,8 +1,11 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 namespace SystemeNote.Models
 {
     [Table("administrateur")]
+    [Index(nameof(NomAdmin), nameof(PrenomAdmin), IsUnique = true)]
+
     public class Administrateur
     {
         [Key]

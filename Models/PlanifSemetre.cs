@@ -1,9 +1,12 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SystemeNote.Models
 {
     [Table("planif_semestre")]
+    [Index(nameof(NomPlanifSemestre), IsUnique = true)]
+
     public class PlanifSemestre
     {
         [Key]

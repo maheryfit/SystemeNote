@@ -18,48 +18,86 @@ namespace SystemeNote.Controllers
         }
 
         // GET: Etudiant
-        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? promotionFilter, bool? isActifFilter, int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
-            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["FirstNameSortParm"] = sortOrder == "fname" ? "fname_desc" : "fname";
-            ViewData["MatriculeSortParm"] = sortOrder == "matricule" ? "matricule_desc" : "matricule";
+            ViewData["MatriculeSortParm"] = String.IsNullOrEmpty(sortOrder) ? "matricule_desc" : "";
+            ViewData["NomSortParm"] = sortOrder == "nom" ? "nom_desc" : "nom";
+            ViewData["PrenomSortParm"] = sortOrder == "prenom" ? "prenom_desc" : "prenom";
+            ViewData["PromotionSortParm"] = sortOrder == "promotion" ? "promotion_desc" : "promotion";
+            ViewData["DateAdmissionSortParm"] = sortOrder == "date" ? "date_desc" : "date";
 
             ViewData["CurrentFilter"] = searchString;
+            ViewData["PromotionFilter"] = promotionFilter;
+            ViewData["IsActifFilter"] = isActifFilter;
+            ViewData["Title"] = "Liste des Étudiants";
 
-            var etudiants = from e in _context.Etudiants.Include(e => e.Promotion)
+            // Populate filter dropdowns
+            ViewData["PromotionList"] = new SelectList(_context.Promotions, "Id", "NomPromotion");
+
+            var etudiants = from e in _context.Etudiants
+                           .Include(e => e.Promotion)
+                           .Include(e => e.PlanifSemestre)
+                           .Include(e => e.Administrateur)
                             select e;
 
+            // Multi-criteria search
             if (!String.IsNullOrEmpty(searchString))
             {
-                etudiants = etudiants.Where(s => s.Nom.Contains(searchString)
-                                       || s.Prenom.Contains(searchString)
-                                       || s.Matricule.Contains(searchString));
+                etudiants = etudiants.Where(e =>
+                    e.Matricule.Contains(searchString) ||
+                    e.Nom.Contains(searchString) ||
+                    e.Prenom.Contains(searchString));
             }
 
+            // Filter by promotion
+            if (promotionFilter.HasValue)
+            {
+                etudiants = etudiants.Where(e => e.PromotionId == promotionFilter.Value);
+            }
+
+            // Filter by status (actif/inactif)
+            if (isActifFilter.HasValue)
+            {
+                etudiants = etudiants.Where(e => e.IsActif == isActifFilter.Value);
+            }
+
+            // Sorting
             switch (sortOrder)
             {
-                case "name_desc":
-                    etudiants = etudiants.OrderByDescending(s => s.Nom);
-                    break;
-                case "fname":
-                    etudiants = etudiants.OrderBy(s => s.Prenom);
-                    break;
-                case "fname_desc":
-                    etudiants = etudiants.OrderByDescending(s => s.Prenom);
-                    break;
-                case "matricule":
-                    etudiants = etudiants.OrderBy(s => s.Matricule);
-                    break;
                 case "matricule_desc":
-                    etudiants = etudiants.OrderByDescending(s => s.Matricule);
+                    etudiants = etudiants.OrderByDescending(e => e.Matricule);
+                    break;
+                case "nom":
+                    etudiants = etudiants.OrderBy(e => e.Nom);
+                    break;
+                case "nom_desc":
+                    etudiants = etudiants.OrderByDescending(e => e.Nom);
+                    break;
+                case "prenom":
+                    etudiants = etudiants.OrderBy(e => e.Prenom);
+                    break;
+                case "prenom_desc":
+                    etudiants = etudiants.OrderByDescending(e => e.Prenom);
+                    break;
+                case "promotion":
+                    etudiants = etudiants.OrderBy(e => e.Promotion!.NomPromotion);
+                    break;
+                case "promotion_desc":
+                    etudiants = etudiants.OrderByDescending(e => e.Promotion!.NomPromotion);
+                    break;
+                case "date":
+                    etudiants = etudiants.OrderBy(e => e.DateAdmission);
+                    break;
+                case "date_desc":
+                    etudiants = etudiants.OrderByDescending(e => e.DateAdmission);
                     break;
                 default:
-                    etudiants = etudiants.OrderBy(s => s.Nom);
+                    etudiants = etudiants.OrderBy(e => e.Matricule);
                     break;
             }
 
-            int pageSize = 10; // Vous pouvez ajuster le nombre d'éléments par page
+            int pageSize = 10;
             return View(await PaginatedList<Etudiant>.CreateAsync(etudiants.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 
