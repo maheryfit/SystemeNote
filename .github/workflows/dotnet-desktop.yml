@@ -47,7 +47,9 @@ jobs:
       - name: Test
         run: dotnet test "$SOLUTION_FILE" --configuration ${{ matrix.configuration }} --no-build --verbosity normal
 
-
+      - name: Publish
+        run: dotnet publish "$SOLUTION_FILE" --configuration ${{ matrix.configuration }} --output ./publish --no-build
+      
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
         with:
