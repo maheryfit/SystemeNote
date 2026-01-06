@@ -4,7 +4,7 @@ name: .NET Build & Test (Ubuntu)
 on:
   push:
     branches: ["main"]
-  pull_request:
+  pull_request: 
     branches: ["main"]
 
 jobs:
@@ -16,29 +16,44 @@ jobs:
         configuration: [Debug, Release]
 
     env:
-      SOLUTION_FILE: SystemeNote.sln  # change if your solution file is different
+      SOLUTION_FILE: SystemeNote.sln
 
-    steps:
+    services:
+      sqlserver:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: Y
+          MSSQL_SA_PASSWORD: SYSTEMENOTEbdd??2025
+          MSSQL_PID:  Developer
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P SYSTEMENOTEbdd??2025 -C -Q 'SELECT 1' || exit 1"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps: 
       - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
-      - name: Setup .NET SDK
+      - name:  Setup .NET SDK
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: "8.0.x"
+          dotnet-version:  "8.0.x"
 
       - name: Cache NuGet packages
-        uses: actions/cache@v4
+        uses:  actions/cache@v4
         with:
-          path: ~/.nuget/packages
+          path:  ~/.nuget/packages
           key: nuget-${{ runner.os }}-${{ matrix.configuration }}-${{ hashFiles('**/*.sln', '**/packages.lock.json') }}
           restore-keys: |
             nuget-${{ runner.os }}-${{ matrix.configuration }}-
-            nuget-${{ runner.os }}-
+            nuget-${{ runner. os }}-
 
-      - name: Restore
+      - name:  Restore
         run: dotnet restore "$SOLUTION_FILE"
 
       - name: Build
@@ -52,30 +67,55 @@ jobs:
       
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
-        with:
+        with: 
           name: SystemeNote-${{ matrix.configuration }}
           path: ./publish
 
       - name: Start Web App in Background
         run: |
           cd ./publish
-          dotnet SystemeNote.dll &
-          echo $! > app.pid
+          nohup dotnet SystemeNote.dll > app.log 2>&1 &
+          echo $! > app. pid
+          cd .. 
         env:
           ASPNETCORE_URLS: "http://localhost:5000"
-          ASPNETCORE_ENVIRONMENT: "Development"
+          ASPNETCORE_ENVIRONMENT:  "Development"
+          ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=SystemeNoteTest;User Id=sa;Password=SYSTEMENOTEbdd??2025;TrustServerCertificate=True;MultipleActiveResultSets=true"
       
       - name: Wait for App to Start
-        run: sleep 10
+        run: sleep 15
       
       - name: Health Check
         run: |
-          curl -f http://localhost:5000 || exit 1
+          # Try to reach the app with retries
+          max_attempts=5
+          attempt=0
+          until curl -f -s http://localhost:5000 > /dev/null || [ $attempt -eq $max_attempts ]; do
+            attempt=$((attempt + 1))
+            echo "Attempt $attempt/$max_attempts: Waiting for app to respond..."
+            sleep 3
+          done
+          
+          if [ $attempt -eq $max_attempts ]; then
+            echo "❌ Web app failed to start!"
+            echo "=== Application Logs ==="
+            cat ./publish/app.log || echo "No logs found"
+            exit 1
+          fi
+          
           echo "✅ Web app is running successfully!"
       
       - name: Stop Web App
         if: always()
         run: |
-          if [ -f ./publish/app.pid ]; then
-            kill $(cat ./publish/app.pid) || true
+          if [ -f ./publish/app. pid ]; then
+            kill $(cat ./publish/app.pid) 2>/dev/null || true
+            rm ./publish/app.pid
           fi
+      
+      - name: Upload App Logs
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-logs-${{ matrix.configuration }}
+          path: ./publish/app.log
