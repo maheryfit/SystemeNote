@@ -74,26 +74,17 @@ jobs:
       - name: Publish
         run: dotnet publish "$SOLUTION_FILE" --configuration ${{ matrix.configuration }} --output ./publish --no-build
 
-      - name: Deploy to DigitalOcean via SSH
-        uses: appleboy/scp-action@v0.1.7
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          source: "./publish/*"
-          target: "/var/www/systemenote"
+      - name: Deploy to local folder on droplet
+        run: |
+          sudo mkdir -p /var/www/systemenote
+          sudo rm -rf /var/www/systemenote/*
+          sudo cp -r ./publish/* /var/www/systemenote/
 
-      - name: Restart app on droplet
-        uses: appleboy/ssh-action@v0.1.10
-        with:
-          host: ${{ secrets.DROPLET_HOST }}
-          username: ${{ secrets.DROPLET_USER }}
-          key: ${{ secrets.DROPLET_SSH_KEY }}
-          script: |
-            sudo systemctl daemon-reload
-            sudo systemctl restart systemenote
-            sudo systemctl status systemenote --no-pager
-
+      - name: Restart systemd service
+        run: |
+          sudo systemctl daemon-reload
+          sudo systemctl restart systemenote
+          sudo systemctl status systemenote --no-pager
       
       - name: Upload publish artifact
         uses: actions/upload-artifact@v4
