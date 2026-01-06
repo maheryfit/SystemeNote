@@ -59,6 +59,15 @@ jobs:
       - name: Build
         run: dotnet build "$SOLUTION_FILE" --configuration ${{ matrix.configuration }} --no-restore
 
+      - name: Apply EF Core migrations
+        run: |
+          dotnet tool install --global dotnet-ef
+          export PATH="$PATH:~/.dotnet/tools"
+          dotnet ef database update
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=systemenote;User Id=sa;Password=SYSTEMENOTEbdd??2025;TrustServerCertificate=True;MultipleActiveResultSets=true"
+
       - name: Test
         run: dotnet test "$SOLUTION_FILE" --configuration ${{ matrix.configuration }} --no-build --verbosity normal
 
@@ -80,7 +89,7 @@ jobs:
         env:
           ASPNETCORE_URLS: "http://localhost:5000"
           ASPNETCORE_ENVIRONMENT:  "Development"
-          ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=SystemeNoteTest;User Id=sa;Password=SYSTEMENOTEbdd??2025;TrustServerCertificate=True;MultipleActiveResultSets=true"
+          ConnectionStrings__DefaultConnection: "Server=localhost,1433;Database=systemenote;User Id=sa;Password=SYSTEMENOTEbdd??2025;TrustServerCertificate=True;MultipleActiveResultSets=true"
       
       - name: Wait for App to Start
         run: sleep 15
