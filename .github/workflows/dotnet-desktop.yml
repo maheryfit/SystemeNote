@@ -55,3 +55,27 @@ jobs:
         with:
           name: SystemeNote-${{ matrix.configuration }}
           path: ./publish
+
+      - name: Start Web App in Background
+        run: |
+          cd ./publish
+          dotnet SystemeNote.dll &
+          echo $! > app.pid
+        env:
+          ASPNETCORE_URLS: "http://localhost:5000"
+          ASPNETCORE_ENVIRONMENT: "Development"
+      
+      - name: Wait for App to Start
+        run: sleep 10
+      
+      - name: Health Check
+        run: |
+          curl -f http://localhost:5000 || exit 1
+          echo "✅ Web app is running successfully!"
+      
+      - name: Stop Web App
+        if: always()
+        run: |
+          if [ -f ./publish/app.pid ]; then
+            kill $(cat ./publish/app.pid) || true
+          fi
