@@ -1,9 +1,40 @@
+@model NoteEtudiant
+
 @{
-    ViewData["Title"] = "Edit NoteEtudiant";
+    ViewData["Title"] = "Editer Note étudiant";
 }
-<h1>Edit NoteEtudiant</h1>
-<form asp-action="Edit" method="post">
-    <!-- Editable fields for NoteEtudiant -->
-    <button type="submit">Save</button>
-    <a asp-action="Index">Cancel</a>
-</form>
+
+<h1>Editer Note Etudiant</h1>
+
+<hr />
+<div class="row">
+    <div class="col-md-4">
+        <form asp-action="Edit" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            <input type="hidden" asp-for="Id" />
+            <input type="hidden" asp-for="EtudiantId" />
+            <input type="hidden" asp-for="ParcoursEtudiantId" />
+
+            <div class="form-group">
+                <label asp-for="Note" class="control-label"></label>
+                <input asp-for="Note" class="form-control" />
+                <span asp-validation-for="Note" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <label asp-for="PromotionId" class="control-label"></label>
+                <select asp-for="PromotionId" class="form-control" asp-items="ViewBag.PromotionId"></select>
+                <span asp-validation-for="PromotionId" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group">
+                <input type="submit" value="Save" class="btn btn-primary" />
+                <a asp-action="Index" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

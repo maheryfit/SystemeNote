@@ -464,25 +464,23 @@ namespace SystemeNote.Controllers
                 }
 
                 bool exists = false;
-                if (etudiantId.HasValue)
+
+                /*if (etudiantId.HasValue)
                 {
                     exists = await _context.NoteEtudiants.AnyAsync(n => n.EtudiantId == etudiantId.Value && n.ParcoursEtudiantId == parcours.Id);
-                }
+                }*/
 
-                if (!exists)
+                var noteEtudiant = new NoteEtudiant
                 {
-                    var noteEtudiant = new NoteEtudiant
-                    {
-                        ParcoursEtudiantId = parcours.Id,
-                        Note = note,
-                        PromotionId = parcours.PlanifSemestre!.PromotionId
-                    };
+                    ParcoursEtudiantId = parcours.Id,
+                    Note = note,
+                    PromotionId = parcours.PlanifSemestre!.PromotionId
+                };
 
-                    if (etudiantId.HasValue) noteEtudiant.EtudiantId = etudiantId.Value;
-                    else noteEtudiant.Etudiant = newEtudiant!;
+                if (etudiantId.HasValue) noteEtudiant.EtudiantId = etudiantId.Value;
+                else noteEtudiant.Etudiant = newEtudiant!;
 
-                    _context.NoteEtudiants.Add(noteEtudiant);
-                }
+                _context.NoteEtudiants.Add(noteEtudiant);
             });
 
             if (errors.Any())

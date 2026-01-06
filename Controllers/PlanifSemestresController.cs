@@ -1,15 +1,11 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Rotativa.AspNetCore;
 using SystemeNote.Data;
+using SystemeNote.Models;
 using SystemeNote.Utils; // Ajout de cette directive using
 using SystemeNote.ViewModels; // Ajout de cette directive using pour les ViewModels si nécessaire
-using SystemeNote.Models;
-using Rotativa.AspNetCore;
-using System.IO;
 
 namespace SystemeNote.Controllers
 {
