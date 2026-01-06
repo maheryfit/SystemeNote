@@ -1,15 +1,11 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Rotativa.AspNetCore;
 using SystemeNote.Data;
+using SystemeNote.Models;
 using SystemeNote.Utils; // Ajout de cette directive using
 using SystemeNote.ViewModels; // Ajout de cette directive using pour les ViewModels si nécessaire
-using SystemeNote.Models;
-using Rotativa.AspNetCore;
-using System.IO;
 
 namespace SystemeNote.Controllers
 {
@@ -23,27 +19,32 @@ namespace SystemeNote.Controllers
         }
 
         // GET: PlanifSemestres
+
         public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
             ViewData["CurrentSort"] = sortOrder;
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
-            ViewData["DateDebutSortParm"] = sortOrder == "date_debut" ? "date_debut_desc" : "date_debut";
-            ViewData["DateFinSortParm"] = sortOrder == "date_fin" ? "date_fin_desc" : "date_fin";
             ViewData["SemestreSortParm"] = sortOrder == "semestre" ? "semestre_desc" : "semestre";
+            ViewData["OptionSortParm"] = sortOrder == "option" ? "option_desc" : "option";
             ViewData["PromotionSortParm"] = sortOrder == "promotion" ? "promotion_desc" : "promotion";
-            ViewData["OptionEtudeSortParm"] = sortOrder == "option_etude" ? "option_etude_desc" : "option_etude";
+            ViewData["DateDebutSortParm"] = sortOrder == "dateDebut" ? "dateDebut_desc" : "dateDebut";
 
             ViewData["CurrentFilter"] = searchString;
+            ViewData["Title"] = "Planifications de Semestre";
 
-            var planifSemestres = _context.PlanifSemestres
-                                          .Include(p => p.Semestre)
-                                          .Include(p => p.Promotion)
-                                          .Include(p => p.OptionEtude)
-                                          .AsQueryable(); // Important pour le tri et la pagination
+            var planifSemestres = from p in _context.PlanifSemestres
+                                  .Include(p => p.Semestre)
+                                  .Include(p => p.OptionEtude)
+                                  .Include(p => p.Promotion)
+                                  select p;
 
             if (!String.IsNullOrEmpty(searchString))
             {
-                planifSemestres = planifSemestres.Where(p => p.NomPlanifSemestre.Contains(searchString));
+                planifSemestres = planifSemestres.Where(p =>
+                    p.NomPlanifSemestre.Contains(searchString) ||
+                    p.Semestre!.NomSemestre.Contains(searchString) ||
+                    p.OptionEtude!.NomOptionEtude.Contains(searchString) ||
+                    p.Promotion!.NomPromotion.Contains(searchString));
             }
 
             switch (sortOrder)
@@ -51,25 +52,36 @@ namespace SystemeNote.Controllers
                 case "name_desc":
                     planifSemestres = planifSemestres.OrderByDescending(p => p.NomPlanifSemestre);
                     break;
-                case "date_debut":
-                    planifSemestres = planifSemestres.OrderBy(p => p.DateDebut);
-                    break;
-                case "date_debut_desc":
-                    planifSemestres = planifSemestres.OrderByDescending(p => p.DateDebut);
-                    break;
-                // Ajoutez d'autres cas pour le tri par DateFin, Semestre, Promotion, OptionEtude si nécessaire
                 case "semestre":
                     planifSemestres = planifSemestres.OrderBy(p => p.Semestre!.NomSemestre);
                     break;
                 case "semestre_desc":
                     planifSemestres = planifSemestres.OrderByDescending(p => p.Semestre!.NomSemestre);
                     break;
-                default: // Tri par défaut par NomPlanifSemestre ascendant
+                case "option":
+                    planifSemestres = planifSemestres.OrderBy(p => p.OptionEtude!.NomOptionEtude);
+                    break;
+                case "option_desc":
+                    planifSemestres = planifSemestres.OrderByDescending(p => p.OptionEtude!.NomOptionEtude);
+                    break;
+                case "promotion":
+                    planifSemestres = planifSemestres.OrderBy(p => p.Promotion!.NomPromotion);
+                    break;
+                case "promotion_desc":
+                    planifSemestres = planifSemestres.OrderByDescending(p => p.Promotion!.NomPromotion);
+                    break;
+                case "dateDebut":
+                    planifSemestres = planifSemestres.OrderBy(p => p.DateDebut);
+                    break;
+                case "dateDebut_desc":
+                    planifSemestres = planifSemestres.OrderByDescending(p => p.DateDebut);
+                    break;
+                default:
                     planifSemestres = planifSemestres.OrderBy(p => p.NomPlanifSemestre);
                     break;
             }
 
-            int pageSize = 10; // Vous pouvez ajuster le nombre d'éléments par page
+            int pageSize = 10;
             return View(await PaginatedList<PlanifSemestre>.CreateAsync(planifSemestres.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
 

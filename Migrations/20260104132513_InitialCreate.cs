@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace SystemeNote.Migrations
 {
     /// <inheritdoc />
-    public partial class init_database : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -40,7 +40,7 @@ namespace SystemeNote.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Diplome",
+                name: "diplome",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -49,7 +49,7 @@ namespace SystemeNote.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Diplome", x => x.Id);
+                    table.PrimaryKey("PK_diplome", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -94,7 +94,7 @@ namespace SystemeNote.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Promotion",
+                name: "promotion",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
@@ -106,11 +106,11 @@ namespace SystemeNote.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Promotion", x => x.Id);
+                    table.PrimaryKey("PK_promotion", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Promotion_Diplome_DiplomeId",
+                        name: "FK_promotion_diplome_DiplomeId",
                         column: x => x.DiplomeId,
-                        principalTable: "Diplome",
+                        principalTable: "diplome",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -129,9 +129,9 @@ namespace SystemeNote.Migrations
                 {
                     table.PrimaryKey("PK_semestre", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_semestre_Diplome_diplome_id",
+                        name: "FK_semestre_diplome_diplome_id",
                         column: x => x.diplome_id,
-                        principalTable: "Diplome",
+                        principalTable: "diplome",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
@@ -154,15 +154,15 @@ namespace SystemeNote.Migrations
                 {
                     table.PrimaryKey("PK_planif_semestre", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_planif_semestre_Promotion_promotion_id",
-                        column: x => x.promotion_id,
-                        principalTable: "Promotion",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_planif_semestre_option_etude_option_etude_id",
                         column: x => x.option_etude_id,
                         principalTable: "option_etude",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_planif_semestre_promotion_promotion_id",
+                        column: x => x.promotion_id,
+                        principalTable: "promotion",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -195,12 +195,6 @@ namespace SystemeNote.Migrations
                 {
                     table.PrimaryKey("PK_etudiant", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_etudiant_Promotion_promotion_id",
-                        column: x => x.promotion_id,
-                        principalTable: "Promotion",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
                         name: "FK_etudiant_administrateur_administrateur_id",
                         column: x => x.administrateur_id,
                         principalTable: "administrateur",
@@ -212,6 +206,12 @@ namespace SystemeNote.Migrations
                         principalTable: "planif_semestre",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_etudiant_promotion_promotion_id",
+                        column: x => x.promotion_id,
+                        principalTable: "promotion",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -290,12 +290,6 @@ namespace SystemeNote.Migrations
                 {
                     table.PrimaryKey("PK_note_etudiant", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_note_etudiant_Promotion_promotion_id",
-                        column: x => x.promotion_id,
-                        principalTable: "Promotion",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Restrict);
-                    table.ForeignKey(
                         name: "FK_note_etudiant_etudiant_etudiant_id",
                         column: x => x.etudiant_id,
                         principalTable: "etudiant",
@@ -307,11 +301,17 @@ namespace SystemeNote.Migrations
                         principalTable: "parcours_etude",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_note_etudiant_promotion_promotion_id",
+                        column: x => x.promotion_id,
+                        principalTable: "promotion",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Diplome_NomDiplome",
-                table: "Diplome",
+                name: "IX_diplome_NomDiplome",
+                table: "diplome",
                 column: "NomDiplome",
                 unique: true);
 
@@ -356,9 +356,10 @@ namespace SystemeNote.Migrations
                 column: "promotion_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_parcours_etude_matiere_id",
+                name: "IX_parcours_etude_matiere_id_unite_enseignement_id_planif_semestre_id",
                 table: "parcours_etude",
-                column: "matiere_id");
+                columns: new[] { "matiere_id", "unite_enseignement_id", "planif_semestre_id" },
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_parcours_etude_planif_semestre_id",
@@ -386,19 +387,19 @@ namespace SystemeNote.Migrations
                 column: "semestre_id");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Promotion_CodePromotion",
-                table: "Promotion",
+                name: "IX_promotion_CodePromotion",
+                table: "promotion",
                 column: "CodePromotion",
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Promotion_DiplomeId",
-                table: "Promotion",
+                name: "IX_promotion_DiplomeId",
+                table: "promotion",
                 column: "DiplomeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Promotion_NomPromotion",
-                table: "Promotion",
+                name: "IX_promotion_NomPromotion",
+                table: "promotion",
                 column: "NomPromotion",
                 unique: true);
 
@@ -451,16 +452,16 @@ namespace SystemeNote.Migrations
                 name: "unite_enseignement");
 
             migrationBuilder.DropTable(
-                name: "Promotion");
+                name: "option_etude");
 
             migrationBuilder.DropTable(
-                name: "option_etude");
+                name: "promotion");
 
             migrationBuilder.DropTable(
                 name: "semestre");
 
             migrationBuilder.DropTable(
-                name: "Diplome");
+                name: "diplome");
         }
     }
 }

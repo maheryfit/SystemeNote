@@ -15,10 +15,18 @@ namespace SystemeNote.Utils
             var importedCount = 0;
             var errors = new StringBuilder();
             var lineNumber = 1;
+            StreamReader reader;
+            try
+            {
+                reader = new StreamReader(file.OpenReadStream(), System.Text.Encoding.GetEncoding("Windows-1252"), detectEncodingFromByteOrderMarks: true);
+            }
+            catch (Exception ex)
+            {
+                reader = new StreamReader(file.OpenReadStream(), System.Text.Encoding.UTF8, detectEncodingFromByteOrderMarks: true);
+            }
 
             try
             {
-                using var reader = new StreamReader(file.OpenReadStream());
                 await reader.ReadLineAsync(); // Ignorer l'en-tête
 
                 while (!reader.EndOfStream)

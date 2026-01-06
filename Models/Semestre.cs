@@ -29,8 +29,8 @@ namespace SystemeNote.Models
         public int DiplomeId { get; set; }
 
         [ForeignKey("DiplomeId")]
-        public virtual required Diplome Diplome { get; set; }
+        public virtual Diplome? Diplome { get; set; }
 
-        public required ICollection<PlanifSemestre> PlanifSemestres { get; set; }
+        public virtual ICollection<PlanifSemestre>? PlanifSemestres { get; set; }
     }
 }

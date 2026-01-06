@@ -1,6 +1,6 @@
 @model SystemeNote.Models.OptionEtude
 @{
-    ViewData["Title"] = "Edit Option d\'étude";
+    ViewData["Title"] = "Edit Option d'étude";
 }
 
 <h1>@ViewData["Title"]</h1>
@@ -16,6 +16,11 @@
                 <label asp-for="NomOptionEtude" class="control-label"></label>
                 <input asp-for="NomOptionEtude" class="form-control" />
                 <span asp-validation-for="NomOptionEtude" class="text-danger"></span>
+            </div>
+            <div class="form-group mb-3">
+                <label asp-for="DiplomeId" class="control-label">Diplôme</label>
+                <select asp-for="DiplomeId" class="form-control" asp-items="ViewBag.DiplomeId"></select>
+                <span asp-validation-for="DiplomeId" class="text-danger"></span>
             </div>
             <div class="form-group">
                 <input type="submit" value="Save" class="btn btn-primary" />

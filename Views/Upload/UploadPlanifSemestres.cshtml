@@ -1,14 +1,14 @@
 @{
-    ViewData["Title"] = "Import Options d'étude";
+    ViewData["Title"] = "Import PlanifSemestres";
 }
 
 <h1>@ViewData["Title"]</h1>
 
-<h4>Upload a CSV file with one column: <strong>NomOption, NomDiplome</strong></h4>
+<h4>Upload a CSV file with columns: <strong>NomPlanifSemestre, DateDebut, DateFin, CodeSemestre, NomOptionEtude, TotalCredit, CodePromotion</strong></h4>
 <hr />
 <div class="row">
     <div class="col-md-6">
-        <form asp-controller="Upload" asp-action="UploadOptionEtudes" method="post" enctype="multipart/form-data">
+        <form asp-controller="Upload" asp-action="UploadPlanifSemestres" method="post" enctype="multipart/form-data">
             <div class="form-group mb-3">
                 <label for="file" class="control-label">CSV File</label>
                 <input name="file" type="file" class="form-control" required />

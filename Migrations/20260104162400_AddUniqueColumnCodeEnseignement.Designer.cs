@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SystemeNote.Data;
 
@@ -11,9 +12,11 @@ using SystemeNote.Data;
 namespace SystemeNote.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260104162400_AddUniqueColumnCodeEnseignement")]
+    partial class AddUniqueColumnCodeEnseignement
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,9 +46,6 @@ namespace SystemeNote.Migrations
                         .HasColumnName("prenom_admin");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("NomAdmin", "PrenomAdmin")
-                        .IsUnique();
 
                     b.ToTable("administrateur");
                 });
@@ -157,9 +157,6 @@ namespace SystemeNote.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("AdministrateurId");
-
-                    b.HasIndex("Matricule")
-                        .IsUnique();
 
                     b.HasIndex("PlanifSemestreId");
 
@@ -363,9 +360,6 @@ namespace SystemeNote.Migrations
                         .HasColumnName("total_credit");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("NomPlanifSemestre")
-                        .IsUnique();
 
                     b.HasIndex("OptionEtudeId");
 

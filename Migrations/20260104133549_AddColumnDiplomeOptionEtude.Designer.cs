@@ -12,8 +12,8 @@ using SystemeNote.Data;
 namespace SystemeNote.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251219070329_init_database")]
-    partial class init_database
+    [Migration("20260104133549_AddColumnDiplomeOptionEtude")]
+    partial class AddColumnDiplomeOptionEtude
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -91,7 +91,7 @@ namespace SystemeNote.Migrations
                     b.HasIndex("NomDiplome")
                         .IsUnique();
 
-                    b.ToTable("Diplome");
+                    b.ToTable("diplome");
                 });
 
             modelBuilder.Entity("SystemeNote.Models.Etudiant", b =>
@@ -266,6 +266,10 @@ namespace SystemeNote.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<int>("DiplomeId")
+                        .HasColumnType("int")
+                        .HasColumnName("diplome_id");
+
                     b.Property<string>("NomOptionEtude")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -273,6 +277,8 @@ namespace SystemeNote.Migrations
                         .HasColumnName("nom_option_etude");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("DiplomeId");
 
                     b.ToTable("option_etude");
                 });
@@ -299,11 +305,12 @@ namespace SystemeNote.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MatiereId");
-
                     b.HasIndex("PlanifSemestreId");
 
                     b.HasIndex("UniteEnseignementId");
+
+                    b.HasIndex("MatiereId", "UniteEnseignementId", "PlanifSemestreId")
+                        .IsUnique();
 
                     b.ToTable("parcours_etude");
                 });
@@ -390,7 +397,7 @@ namespace SystemeNote.Migrations
                     b.HasIndex("NomPromotion")
                         .IsUnique();
 
-                    b.ToTable("Promotion");
+                    b.ToTable("promotion");
                 });
 
             modelBuilder.Entity("SystemeNote.Models.Semestre", b =>
@@ -524,6 +531,17 @@ namespace SystemeNote.Migrations
                     b.Navigation("ParcoursEtude");
 
                     b.Navigation("Promotion");
+                });
+
+            modelBuilder.Entity("SystemeNote.Models.OptionEtude", b =>
+                {
+                    b.HasOne("SystemeNote.Models.Diplome", "Diplome")
+                        .WithMany()
+                        .HasForeignKey("DiplomeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Diplome");
                 });
 
             modelBuilder.Entity("SystemeNote.Models.ParcoursEtude", b =>

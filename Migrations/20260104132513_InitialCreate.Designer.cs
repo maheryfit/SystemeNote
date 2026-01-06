@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using SystemeNote.Data;
 
@@ -11,9 +12,11 @@ using SystemeNote.Data;
 namespace SystemeNote.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260104132513_InitialCreate")]
+    partial class InitialCreate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -43,9 +46,6 @@ namespace SystemeNote.Migrations
                         .HasColumnName("prenom_admin");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("NomAdmin", "PrenomAdmin")
-                        .IsUnique();
 
                     b.ToTable("administrateur");
                 });
@@ -158,9 +158,6 @@ namespace SystemeNote.Migrations
 
                     b.HasIndex("AdministrateurId");
 
-                    b.HasIndex("Matricule")
-                        .IsUnique();
-
                     b.HasIndex("PlanifSemestreId");
 
                     b.HasIndex("PromotionId");
@@ -223,12 +220,6 @@ namespace SystemeNote.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CodeMatiere")
-                        .IsUnique();
-
-                    b.HasIndex("NomMatiere")
-                        .IsUnique();
-
                     b.ToTable("matiere");
                 });
 
@@ -275,10 +266,6 @@ namespace SystemeNote.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("DiplomeId")
-                        .HasColumnType("int")
-                        .HasColumnName("diplome_id");
-
                     b.Property<string>("NomOptionEtude")
                         .IsRequired()
                         .HasMaxLength(255)
@@ -286,8 +273,6 @@ namespace SystemeNote.Migrations
                         .HasColumnName("nom_option_etude");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("DiplomeId");
 
                     b.ToTable("option_etude");
                 });
@@ -363,9 +348,6 @@ namespace SystemeNote.Migrations
                         .HasColumnName("total_credit");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("NomPlanifSemestre")
-                        .IsUnique();
 
                     b.HasIndex("OptionEtudeId");
 
@@ -469,9 +451,6 @@ namespace SystemeNote.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("CodeUniteEnseignement")
-                        .IsUnique();
-
                     b.ToTable("unite_enseignement");
                 });
 
@@ -546,17 +525,6 @@ namespace SystemeNote.Migrations
                     b.Navigation("ParcoursEtude");
 
                     b.Navigation("Promotion");
-                });
-
-            modelBuilder.Entity("SystemeNote.Models.OptionEtude", b =>
-                {
-                    b.HasOne("SystemeNote.Models.Diplome", "Diplome")
-                        .WithMany()
-                        .HasForeignKey("DiplomeId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Diplome");
                 });
 
             modelBuilder.Entity("SystemeNote.Models.ParcoursEtude", b =>

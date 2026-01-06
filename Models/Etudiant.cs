@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -5,6 +6,7 @@ namespace SystemeNote.Models
 {
 
     [Table("etudiant")]
+    [Index(nameof(Matricule), IsUnique = true)]
     public class Etudiant
     {
         [Key]
@@ -52,7 +54,7 @@ namespace SystemeNote.Models
 
         [Required]
         [Column("administrateur_id")]
-        public int  AdministrateurId { get; set; }
+        public int AdministrateurId { get; set; }
 
 
         [ForeignKey("AdministrateurId")]
@@ -70,11 +72,7 @@ namespace SystemeNote.Models
         [DataType(DataType.Password)]
         public string? MotDePasse { get; set; }="password123";
 
-
-
-
-
-        public   ICollection<NoteEtudiant> NoteEtudiants { get; set; }=new List<NoteEtudiant>();
+        public ICollection<NoteEtudiant> NoteEtudiants { get; set; }=new List<NoteEtudiant>();
         public ICollection<HistoriqueSemestreEtudiant> HistoriqueSemestreEtudiants { get; set; }= new List<HistoriqueSemestreEtudiant>();
     }
 

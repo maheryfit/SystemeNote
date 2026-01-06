@@ -1,9 +1,12 @@
-using System.ComponentModel.DataAnnotations.Schema;
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace SystemeNote.Models
 {
     [Table("planif_semestre")]
+    [Index(nameof(NomPlanifSemestre), IsUnique = true)]
+
     public class PlanifSemestre
     {
         [Key]
@@ -48,11 +51,11 @@ namespace SystemeNote.Models
         public virtual OptionEtude? OptionEtude { get; set; }
 
         [ForeignKey("PromotionId")]
-        public virtual  Promotion? Promotion { get; set; }
+        public virtual Promotion? Promotion { get; set; }
 
-        public  required ICollection<ParcoursEtude> ParcoursEtudes { get; set; }= new List<ParcoursEtude>();
-        public  ICollection<Etudiant> Etudiants { get; set; }=new List<Etudiant>();
-        public  ICollection<HistoriqueSemestreEtudiant> HistoriqueSemestreEtudiants { get; set; } = new List<HistoriqueSemestreEtudiant>();
+        public ICollection<ParcoursEtude> ParcoursEtudes { get; set; }= new List<ParcoursEtude>();
+        public ICollection<Etudiant> Etudiants { get; set; }=new List<Etudiant>();
+        public ICollection<HistoriqueSemestreEtudiant> HistoriqueSemestreEtudiants { get; set; } = new List<HistoriqueSemestreEtudiant>();
     
     }
 

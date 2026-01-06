@@ -17,11 +17,36 @@ namespace SystemeNote.Controllers
 
 
         // GET: Diplomes
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
         {
-            ViewData["Title"] = "Diplomes";
-            return View(await _context.Diplomes.ToListAsync());
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
+
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["Title"] = "Liste des Diplômes";
+
+            var diplomes = from d in _context.Diplomes
+                           select d;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                diplomes = diplomes.Where(d => d.NomDiplome.Contains(searchString));
+            }
+
+            switch (sortOrder)
+            {
+                case "name_desc":
+                    diplomes = diplomes.OrderByDescending(d => d.NomDiplome);
+                    break;
+                default:
+                    diplomes = diplomes.OrderBy(d => d.NomDiplome);
+                    break;
+            }
+
+            int pageSize = 10;
+            return View(await PaginatedList<Diplome>.CreateAsync(diplomes.AsNoTracking(), pageNumber ?? 1, pageSize));
         }
+
 
 
         // GET: Diplomes/Details/5

@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace SystemeNote.Models
 {   
-    [Table("Promotion")]
+    [Table("promotion")]
     [Index(nameof(NomPromotion), IsUnique = true)]
     [Index(nameof(CodePromotion), IsUnique = true)]
     public class Promotion

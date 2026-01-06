@@ -129,7 +129,7 @@ namespace SystemeNote.Controllers
                 if (!exists) _context.Promotions.Add(new Promotion { NomPromotion = cols[0], DateCreation = DateOnly.Parse(cols[1]), CodePromotion = cols[2], DiplomeId = diplomeId });
             });
             TempData["Message"] = result;
-            return RedirectToAction("Index", "Home");
+            return RedirectToAction("Index", "Promotions");
         }
         #endregion
 
@@ -217,14 +217,21 @@ namespace SystemeNote.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadOptionEtudes(IFormFile file)
         {
+            var diplomes = await _context.Diplomes.ToDictionaryAsync(m => m.NomDiplome, m => m.Id);
             var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
             {
-                if (cols.Length < 1) throw new Exception("Le fichier CSV doit contenir 1 colonne : NomOptionEtude");
+                if (cols.Length < 2) throw new Exception("Le fichier CSV doit contenir 2 colonne : NomOptionEtude, NomDiplome");
                 var nomOptionEtude = cols[0];
+                var nomDiplome = cols[1];
                 if (string.IsNullOrWhiteSpace(nomOptionEtude)) return;
-
+                if (!diplomes.TryGetValue(nomDiplome, out var diplomeId)) throw new Exception($"Diplôme '{nomDiplome}' non trouvé.");
                 var exists = await _context.OptionEtudes.AnyAsync(o => o.NomOptionEtude == nomOptionEtude);
-                if (!exists) _context.OptionEtudes.Add(new OptionEtude { NomOptionEtude = nomOptionEtude, PlanifSemestres = new List<PlanifSemestre>() });
+                if (!exists) _context.OptionEtudes.Add(new OptionEtude
+                    {
+                        NomOptionEtude = nomOptionEtude,
+                        DiplomeId = diplomeId,
+                        PlanifSemestres = new List<PlanifSemestre>()
+                    });
             });
             TempData["Message"] = result;
             return RedirectToAction("Index", "OptionEtudes");
@@ -256,7 +263,7 @@ namespace SystemeNote.Controllers
         }
         #endregion
 
-        #region ParcoursEtud`es
+        #region ParcoursEtudes
         public IActionResult UploadParcoursEtudes() => View();
 
         [HttpPost]
@@ -457,25 +464,23 @@ namespace SystemeNote.Controllers
                 }
 
                 bool exists = false;
-                if (etudiantId.HasValue)
+
+                /*if (etudiantId.HasValue)
                 {
                     exists = await _context.NoteEtudiants.AnyAsync(n => n.EtudiantId == etudiantId.Value && n.ParcoursEtudiantId == parcours.Id);
-                }
+                }*/
 
-                if (!exists)
+                var noteEtudiant = new NoteEtudiant
                 {
-                    var noteEtudiant = new NoteEtudiant
-                    {
-                        ParcoursEtudiantId = parcours.Id,
-                        Note = note,
-                        PromotionId = parcours.PlanifSemestre!.PromotionId
-                    };
+                    ParcoursEtudiantId = parcours.Id,
+                    Note = note,
+                    PromotionId = parcours.PlanifSemestre!.PromotionId
+                };
 
-                    if (etudiantId.HasValue) noteEtudiant.EtudiantId = etudiantId.Value;
-                    else noteEtudiant.Etudiant = newEtudiant!;
+                if (etudiantId.HasValue) noteEtudiant.EtudiantId = etudiantId.Value;
+                else noteEtudiant.Etudiant = newEtudiant!;
 
-                    _context.NoteEtudiants.Add(noteEtudiant);
-                }
+                _context.NoteEtudiants.Add(noteEtudiant);
             });
 
             if (errors.Any())
@@ -487,6 +492,49 @@ namespace SystemeNote.Controllers
 
             TempData["Message"] = result;
             return RedirectToAction("Index", "NoteEtudiants");
+        }
+        #endregion
+
+        #region PlanifSemestres
+        public IActionResult UploadPlanifSemestres() => View();
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UploadPlanifSemestres(IFormFile file)
+        {
+            var semestres = await _context.Semestres.ToDictionaryAsync(s => s.CodeSemestre, s => s.Id);
+            var options = await _context.OptionEtudes.ToDictionaryAsync(o => o.NomOptionEtude, o => o.Id);
+            var promotions = await _context.Promotions.ToDictionaryAsync(p => p.CodePromotion, p => p.Id);
+
+            var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
+            {
+                if (cols.Length < 7) throw new Exception("Le fichier CSV doit contenir 7 colonnes : NomPlanifSemestre, DateDebut, DateFin, CodeSemestre, NomOptionEtude, TotalCredit, CodePromotion");
+                var nomPlanif = cols[0];
+                var dateDebut = ParseDate(cols[1]);
+                var dateFin = ParseDate(cols[2]);
+                var codeSemestre = cols[3];
+                var nomOption = cols[4];
+                var totalCredit = ParseInt(cols[5]);
+                var codePromotion = cols[6];
+                if (!semestres.TryGetValue(codeSemestre, out var semestreId)) throw new Exception($"Semestre '{codeSemestre}' non trouvé.");
+                if (!options.TryGetValue(nomOption, out var optionId)) throw new Exception($"Option d'étude '{nomOption}' non trouvée.");
+                if (!promotions.TryGetValue(codePromotion, out var promotionId)) throw new Exception($"Promotion '{codePromotion}' non trouvée.");
+                var exists = await _context.PlanifSemestres.AnyAsync(p => p.NomPlanifSemestre == nomPlanif);
+                if (!exists)
+                {
+                    _context.PlanifSemestres.Add(new PlanifSemestre
+                    {
+                        NomPlanifSemestre = nomPlanif,
+                        SemestreId = semestreId,
+                        OptionEtudeId = optionId,
+                        TotalCredit = totalCredit,
+                        PromotionId = promotionId,
+                        DateDebut = dateDebut,
+                        DateFin = dateFin
+                    });
+                }
+            });
+            TempData["Message"] = result;
+            return RedirectToAction("Index", "PlanifSemestres");
         }
         #endregion
 

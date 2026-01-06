@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 namespace SystemeNote.Models
@@ -5,6 +6,7 @@ namespace SystemeNote.Models
 
 
     [Table("unite_enseignement")]
+    [Index(nameof(CodeUniteEnseignement), IsUnique = true)]
     public class UniteEnseignement
     {
         [Key]
@@ -20,7 +22,7 @@ namespace SystemeNote.Models
         [Column("credits")]
         public int Credits { get; set; }
 
-        public required ICollection<ParcoursEtude> ParcoursEtudes { get; set; }= new List<ParcoursEtude>();
+        public virtual ICollection<ParcoursEtude>? ParcoursEtudes { get; set; }= new List<ParcoursEtude>();
     }
 
 }
