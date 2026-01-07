@@ -1,0 +1,169 @@
+﻿@page
+@model SystemeNote.Pages.DashboardEtudiants.IndexModel
+@using System.Text.Json
+@{
+    ViewData["Title"] = "Tableau de bord Étudiant";
+}
+
+<div class="d-sm-flex align-items-center justify-content-between mb-4">
+    <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
+    @if (!string.IsNullOrWhiteSpace(Model.Dashboard.NomPlanifSemestreActuel))
+    {
+        <span class="text-muted small">Planification actuelle: @Model.Dashboard.NomPlanifSemestreActuel</span>
+    }
+</div>
+
+<div class="row">
+    <!-- UE admis -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-success shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                            UE admis (planif actuelle)
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Dashboard.TotalUeAdmis</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-check fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- UE ajournés -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-danger shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                            UE ajournés (planif actuelle)
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">@Model.Dashboard.TotalUeAjournes</div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-times fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Moyenne actuelle -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-info shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                            Moyenne semestre actuel
+                        </div>
+                        <div class="h5 mb-0 font-weight-bold text-gray-800">
+                            @(Model.Dashboard.MoyenneSemestreActuel.HasValue
+                                ? Model.Dashboard.MoyenneSemestreActuel.Value.ToString("F2")
+                                : "N/A")
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-chart-line fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progression -->
+    <div class="col-xl-3 col-md-6 mb-4">
+        <div class="card border-left-primary shadow h-100 py-2">
+            <div class="card-body">
+                <div class="row no-gutters align-items-center">
+                    <div class="col mr-2">
+                        <div class="text-xs font-weight-bold text-primary text-uppercase mb-1">
+                            Progression moyenne (vs dernière planif)
+                        </div>
+
+                        <div class="h6 mb-1 text-gray-800">
+                            Précédent:
+                            <strong>
+                                @(Model.Dashboard.MoyenneSemestrePrecedent.HasValue
+                                    ? Model.Dashboard.MoyenneSemestrePrecedent.Value.ToString("F2")
+                                    : "N/A")
+                            </strong>
+                        </div>
+
+                        <div class="h6 mb-0 text-gray-800">
+                            Évolution:
+                            <strong>
+                                @(Model.Dashboard.EvolutionMoyenne.HasValue
+                                    ? Model.Dashboard.EvolutionMoyenne.Value.ToString("+0.00;-0.00;0.00")
+                                    : "N/A")
+                            </strong>
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <i class="fas fa-exchange-alt fa-2x text-gray-300"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Graph bar -->
+<div class="row">
+    <div class="col-lg-12">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3 d-flex flex-row align-items-center justify-content-between">
+                <h6 class="m-0 font-weight-bold text-primary">Graphique (bar) - exemple</h6>
+            </div>
+            <div class="card-body">
+                <div class="chart-bar" style="height: 320px;">
+                    <canvas id="studentBarChart"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+@section Scripts {
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const labels = @Html.Raw(JsonSerializer.Serialize(Model.Dashboard.BarLabels));
+            const values = @Html.Raw(JsonSerializer.Serialize(Model.Dashboard.BarValues));
+            const canvas = document.getElementById("studentBarChart");
+
+            if (!canvas) return;
+
+            if (canvas._chart) {
+                canvas._chart.destroy();
+            }
+
+            canvas._chart = new Chart(canvas, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valeurs (placeholder)',
+                        data: values,
+                        backgroundColor: 'rgba(78, 115, 223, 0.6)',
+                        borderColor: 'rgba(78, 115, 223, 1)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    scales: {
+                        yAxes: [{
+                            ticks: {
+                                beginAtZero: true,
+                                suggestedMin: 0
+                            }
+                        }]
+                    }
+                }
+            });
+        });
+    </script>
+}
