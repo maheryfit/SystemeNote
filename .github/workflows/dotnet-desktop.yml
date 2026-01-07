@@ -47,15 +47,6 @@ jobs:
       - name: Publish (Release)
         run: dotnet publish "$SOLUTION_FILE" --configuration Release --output "$PUBLISH_DIR" --no-build
 
-      - name: Install dotnet-ef 8.0
-        run: |
-          dotnet tool install --global dotnet-ef --version 8.0.0
-          echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
-          
-      - name: Apply EF Core migrations
-        run: |
-          dotnet ef database update
-
       - name: Deploy files to runtime folder
         run: |
           sudo mkdir -p "$DEPLOY_DIR"
