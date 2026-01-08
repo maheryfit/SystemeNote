@@ -1,9 +1,10 @@
-using Microsoft.EntityFrameworkCore;
-using SystemeNote.Data;
-using Rotativa.AspNetCore;
-using System.IO;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.AspNetCore.Server.Kestrel.Core;
+using Microsoft.EntityFrameworkCore;
+using Rotativa.AspNetCore;
+using System.IO;
+using SystemeNote.Data;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -15,6 +16,17 @@ builder.Services.AddDbContext<AppDbContext>(opt =>
         sqlOptions.EnableRetryOnFailure()
     )
 );
+
+builder.Services
+    .AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+    .AddCookie(options =>
+    {
+        options.LoginPath = "/Account/Login";
+        options.LogoutPath = "/Account/Logout";
+        options.AccessDeniedPath = "/Account/AccessDenied";
+        options.SlidingExpiration = true;
+        options.ExpireTimeSpan = TimeSpan.FromHours(8);
+    });
 
 // Add services to the container.
 builder.Services.AddRazorPages();

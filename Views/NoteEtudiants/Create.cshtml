@@ -8,22 +8,37 @@
     <div class="col-md-4">
         <form asp-action="Create" method="post">
             <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
             <div class="form-group mb-3">
                 <label asp-for="EtudiantId" class="control-label"></label>
                 <select asp-for="EtudiantId" class="form-control" asp-items="ViewBag.EtudiantId"></select>
                 <span asp-validation-for="EtudiantId" class="text-danger"></span>
             </div>
+
             <div class="form-group mb-3">
-                <label asp-for="ParcoursEtudiantId" class="control-label"></label>
-                <select asp-for="ParcoursEtudiantId" class="form-control"
-                    asp-items="ViewBag.ParcoursEtudiantId"></select>
-                <span asp-validation-for="ParcoursEtudiantId" class="text-danger"></span>
+                <label asp-for="PlanifSemestreId" class="control-label">Planification Semestre</label>
+                <select asp-for="PlanifSemestreId" class="form-control" asp-items="ViewBag.PlanifSemestreId"></select>
+                <span asp-validation-for="PlanifSemestreId" class="text-danger"></span>
             </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="UniteEnseignementId" class="control-label">Unité d'Enseignement</label>
+                <select asp-for="UniteEnseignementId" class="form-control" asp-items="ViewBag.UniteEnseignementId"></select>
+                <span asp-validation-for="UniteEnseignementId" class="text-danger"></span>
+            </div>
+
+            <div class="form-group mb-3">
+                <label asp-for="MatiereId" class="control-label">Matière</label>
+                <select asp-for="MatiereId" class="form-control" asp-items="ViewBag.MatiereId"></select>
+                <span asp-validation-for="MatiereId" class="text-danger"></span>
+            </div>
+
             <div class="form-group mb-3">
                 <label asp-for="PromotionId" class="control-label"></label>
                 <select asp-for="PromotionId" class="form-control" asp-items="ViewBag.PromotionId"></select>
                 <span asp-validation-for="PromotionId" class="text-danger"></span>
             </div>
+
             <div class="form-group mb-3">
                 <label asp-for="Note" class="control-label"></label>
                 <input asp-for="Note" class="form-control" />

@@ -116,15 +116,57 @@ namespace SystemeNote.Controllers
         public IActionResult Create()
         {
             ViewData["EtudiantId"] = new SelectList(_context.Etudiants, "Id", "Matricule");
-            ViewData["ParcoursEtudiantId"] = new SelectList(_context.ParcoursEtudes, "Id", "Id");
-            ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion"); return View();
+            ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion");
+
+            ViewData["MatiereId"] = new SelectList(_context.Matieres, "Id", "NomMatiere");
+            ViewData["UniteEnseignementId"] = new SelectList(_context.UniteEnseignements, "Id", "CodeUniteEnseignement");
+            ViewData["PlanifSemestreId"] = new SelectList(_context.PlanifSemestres, "Id", "NomPlanifSemestre");
+
+            return View();
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("Id,EtudiantId,ParcoursEtudiantId,Note,PromotionId")] NoteEtudiant noteEtudiant)
         {
-            if (ModelState.IsValid) { _context.Add(noteEtudiant); await _context.SaveChangesAsync(); return RedirectToAction(nameof(Index)); }
+            if (!noteEtudiant.MatiereId.HasValue)
+            {
+                ModelState.AddModelError(nameof(NoteEtudiant.MatiereId), "Matière obligatoire.");
+            }
+
+            if (!noteEtudiant.UniteEnseignementId.HasValue)
+            {
+                ModelState.AddModelError(nameof(NoteEtudiant.UniteEnseignementId), "Unité d'Enseignement obligatoire.");
+            }
+
+            if (!noteEtudiant.PlanifSemestreId.HasValue)
+            {
+                ModelState.AddModelError(nameof(NoteEtudiant.PlanifSemestreId), "Planification Semestre obligatoire.");
+            }
+
+            if (ModelState.IsValid)
+            {
+                var parcours = await _context.ParcoursEtudes
+                    .AsNoTracking()
+                    .SingleOrDefaultAsync(p =>
+                        p.MatiereId == noteEtudiant.MatiereId.Value &&
+                        p.UniteEnseignementId == noteEtudiant.UniteEnseignementId.Value &&
+                        p.PlanifSemestreId == noteEtudiant.PlanifSemestreId.Value);
+
+                if (parcours is null)
+                {
+                    ModelState.AddModelError(string.Empty, "Aucun parcours ne correspond à la combinaison sélectionnée (Matière + UE + Semestre).");
+                }
+                else
+                {
+                    noteEtudiant.ParcoursEtudiantId = parcours.Id;
+
+                    _context.Add(noteEtudiant);
+                    await _context.SaveChangesAsync();
+                    return RedirectToAction(nameof(Index));
+                }
+            }
+
             ViewData["EtudiantId"] = new SelectList(_context.Etudiants, "Id", "Matricule", noteEtudiant.EtudiantId);
             ViewData["ParcoursEtudiantId"] = new SelectList(_context.ParcoursEtudes, "Id", "Id", noteEtudiant.ParcoursEtudiantId);
             ViewData["PromotionId"] = new SelectList(_context.Promotions, "Id", "NomPromotion", noteEtudiant.PromotionId);
