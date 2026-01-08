@@ -34,6 +34,14 @@ namespace SystemeNote.Models
 
         [ForeignKey("PromotionId")]
         public virtual Promotion? Promotion { get; set; }
+        [NotMapped]
+        public int? MatiereId { get; set; }
+
+        [NotMapped]
+        public int? UniteEnseignementId { get; set; }
+
+        [NotMapped]
+        public int? PlanifSemestreId { get; set; }
     }
 
 }
