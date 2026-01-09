@@ -67,4 +67,57 @@ GO
 --- DBCC CHECKIDENT ('note_etudiant', RESEED, 0);
 --- DELETE FROM etudiant;
 --- DBCC CHECKIDENT ('etudiant', RESEED, 0);
-              
+
+WITH NotesUnion AS
+(
+    SELECT
+        parc.unite_enseignement_id,
+        CAST(0 AS decimal(18, 4)) AS note_max,
+        ue.credits AS credits
+    FROM parcours_etude parc
+    INNER JOIN unite_enseignement ue ON parc.unite_enseignement_id = ue.id
+    WHERE parc.planif_semestre_id = 1
+
+    UNION ALL
+
+    SELECT
+        pe.unite_enseignement_id,
+        CAST(MAX(ne.note) * ue.credits AS decimal(18, 4)) AS note_max,
+        CAST(ue.credits AS int) AS credits
+    FROM note_etudiant ne
+    INNER JOIN parcours_etude pe ON ne.parcours_etudiant_id = pe.id
+    INNER JOIN unite_enseignement ue ON pe.unite_enseignement_id = ue.id
+    WHERE ne.etudiant_id = 1
+      AND pe.planif_semestre_id = 1
+    GROUP BY pe.unite_enseignement_id, ue.credits
+),
+NoteEtudiant AS
+(
+    SELECT
+        unite_enseignement_id,
+        MAX(note_max) AS note_max,
+        MAX(credits) AS credits
+    FROM NotesUnion
+    GROUP BY unite_enseignement_id
+)
+SELECT
+    CAST(SUM(note_max) AS decimal(18, 4)) / NULLIF(CAST(SUM(credits) AS decimal(18, 4)), 0) AS moyenne
+FROM NoteEtudiant;
+
+SELECT TOP(6) Id, credits FROM unite_enseignement;
+
+unite_enseignement_id, note_max, credits, note
+1,	0,	0,	0
+2,	0,	0,	0
+3,	20,	4,	5
+4,	42,	4,	10.5
+5,	0,	0,	0
+6,	70,	4,	17.5
+
+id,credits
+1,	7
+2,	5
+3,	4
+4,	4
+5,	6
+6,	4

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
 using System.Security.Claims;
 using SystemeNote.ViewModels;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SystemeNote.Pages.DashboardEtudiants
 {
@@ -50,18 +49,84 @@ namespace SystemeNote.Pages.DashboardEtudiants
                 ? parsed
                 : null;
             var ues = await GetUesForEtudiantAsync(PlanifSemestreId);
+            var listeNotes = await GetNotesForEtudiantAsync(EtudiantId.Value, PlanifSemestreId);
+            var moyenneSemestreActuel = await GetMoyennesForEtudiantAsync(EtudiantId.Value, PlanifSemestreId);
 
             Dashboard = new EtudiantDashboardViewModel
             {
                 NomPlanifSemestreActuel = await GetPlanifSemestreNameAsync(PlanifSemestreId),
                 TotalUeAdmis = 5,
                 TotalUeAjournes = 2,
-                MoyenneSemestreActuel = null,
+                MoyenneSemestreActuel = moyenneSemestreActuel,
                 MoyenneSemestrePrecedent = null,
                 EvolutionMoyenne = null,
                 BarLabels = ues.Select(x => x.Nom).ToList(),
-                BarValues = await GetNotesForEtudiantAsync(EtudiantId.Value, PlanifSemestreId)
+                BarValues = listeNotes
             };
+        }
+
+        private async Task<decimal> GetMoyennesForEtudiantAsync(int etudiantId, int? planifSemestreId)
+        {
+            if (planifSemestreId is null)
+            {
+                return 0;
+            }
+            const string sql = @"
+                WITH NotesUnion AS
+                (
+                    SELECT
+                        parc.unite_enseignement_id,
+                        CAST(0 AS decimal(18, 4)) AS note_max,
+                        ue.credits AS credits
+                    FROM parcours_etude parc
+                    INNER JOIN unite_enseignement ue ON parc.unite_enseignement_id = ue.id
+                    WHERE parc.planif_semestre_id = @planifSemestreId
+
+                    UNION ALL
+
+                    SELECT
+                        pe.unite_enseignement_id,
+                        CAST(MAX(ne.note) * ue.credits AS decimal(18, 4)) AS note_max,
+                        CAST(ue.credits AS int) AS credits
+                    FROM note_etudiant ne
+                    INNER JOIN parcours_etude pe ON ne.parcours_etudiant_id = pe.id
+                    INNER JOIN unite_enseignement ue ON pe.unite_enseignement_id = ue.id
+                    WHERE ne.etudiant_id = @etudiantId
+                      AND pe.planif_semestre_id = @planifSemestreId
+                    GROUP BY pe.unite_enseignement_id, ue.credits
+                ),
+                NoteEtudiant AS
+                (
+                    SELECT
+                        unite_enseignement_id,
+                        MAX(note_max) AS note_max,
+                        MAX(credits) AS credits
+                    FROM NotesUnion
+                    GROUP BY unite_enseignement_id
+                )
+                SELECT
+                    CAST(SUM(note_max) AS decimal(18, 4)) / NULLIF(CAST(SUM(credits) AS decimal(18, 4)), 0) AS moyenne
+                FROM NoteEtudiant;
+
+                SELECT TOP(6) Id, credits FROM unite_enseignement;
+            ";
+            await using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                await using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@planifSemestreId", planifSemestreId.Value);
+                    command.Parameters.AddWithValue("@etudiantId", etudiantId);
+
+                    await using var reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        return reader.GetDecimal(0);
+                    }
+                }
+            }
+            return 0;
         }
 
         private async Task<List<double>> GetNotesForEtudiantAsync(int etudiantId, int? planifSemestreId)
