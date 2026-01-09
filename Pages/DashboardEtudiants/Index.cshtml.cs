@@ -1,10 +1,11 @@
-﻿using System.Security.Claims;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
+using System.Security.Claims;
 using SystemeNote.ViewModels;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 namespace SystemeNote.Pages.DashboardEtudiants
 {
@@ -48,6 +49,7 @@ namespace SystemeNote.Pages.DashboardEtudiants
             PlanifSemestreId ??= PlanifSemestreOptions.FirstOrDefault() is { Value: var v } && int.TryParse(v, out var parsed)
                 ? parsed
                 : null;
+            var ues = await GetUesForEtudiantAsync(PlanifSemestreId);
 
             Dashboard = new EtudiantDashboardViewModel
             {
@@ -57,10 +59,100 @@ namespace SystemeNote.Pages.DashboardEtudiants
                 MoyenneSemestreActuel = null,
                 MoyenneSemestrePrecedent = null,
                 EvolutionMoyenne = null,
-                BarLabels = new List<string> { "UE1", "UE2", "UE3" },
-                BarValues = new List<double> { 4, 5, 6 }
+                BarLabels = ues.Select(x => x.Nom).ToList(),
+                BarValues = await GetNotesForEtudiantAsync(EtudiantId.Value, PlanifSemestreId)
             };
         }
+
+        private async Task<List<double>> GetNotesForEtudiantAsync(int etudiantId, int? planifSemestreId)
+        {
+            if (planifSemestreId is null)
+            {
+                return [];
+            }
+            const string sql = @"
+                WITH NotesUnion AS
+                (
+                    SELECT
+                        parc.unite_enseignement_id,
+                        CAST(0 AS int) AS note_max
+                    FROM parcours_etude parc
+                    WHERE parc.planif_semestre_id = @planifSemestreId
+
+                    UNION ALL
+
+                    SELECT
+                        pe.unite_enseignement_id,
+                        MAX(ne.note) AS note_max
+                    FROM note_etudiant ne
+                    INNER JOIN parcours_etude pe ON ne.parcours_etudiant_id = pe.id
+                    WHERE ne.etudiant_id = @etudiantId
+                      AND pe.planif_semestre_id = @planifSemestreId
+                    GROUP BY pe.unite_enseignement_id
+                )
+                SELECT
+                    unite_enseignement_id,
+                    MAX(note_max) AS note_max
+                FROM NotesUnion
+                GROUP BY unite_enseignement_id
+                ORDER BY unite_enseignement_id
+            ";
+            var result = new List<double>();
+            await using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                await using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@planifSemestreId", planifSemestreId.Value);
+                    command.Parameters.AddWithValue("@etudiantId", etudiantId);
+
+                    await using var reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        result.Add(reader.GetDouble(1));
+                    }
+                }
+            }
+            return result;
+        }
+
+        private async Task<List<UeItem>> GetUesForEtudiantAsync(int? planifSemestreId)
+        {
+            if (planifSemestreId is null)
+            {
+                return [];
+            }
+
+            const string sql = @"
+                SELECT ue.* FROM unite_enseignement ue
+                INNER JOIN parcours_etude pe ON pe.unite_enseignement_id = ue.id
+                WHERE pe.planif_semestre_id = @planifSemestreId
+                ORDER BY ue.id
+                ;
+            ";
+
+            var result = new List<UeItem>();
+
+            await using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+
+                await using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@planifSemestreId", planifSemestreId.Value);
+                    await using var reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        result.Add(new UeItem(reader.GetInt32(0), reader.GetString(1)));
+                    }
+                }
+            }
+
+            return result;
+        }
+
+        private sealed record UeItem(int Id, string Nom);
 
         private async Task<List<SelectListItem>> GetPlanifSemestreOptionsAsync(int etudiantId)
         {

@@ -67,3 +67,4 @@ GO
 --- DBCC CHECKIDENT ('note_etudiant', RESEED, 0);
 --- DELETE FROM etudiant;
 --- DBCC CHECKIDENT ('etudiant', RESEED, 0);
+              
