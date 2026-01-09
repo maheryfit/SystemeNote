@@ -70,7 +70,7 @@ namespace SystemeNote.Models
         [StringLength(255)]
         [Column("mot_de_passe")]
         [DataType(DataType.Password)]
-        public string? MotDePasse { get; set; }="password123";
+        public string? MotDePasse { get; set; }="pass123";
 
         public ICollection<NoteEtudiant> NoteEtudiants { get; set; }=new List<NoteEtudiant>();
         public ICollection<HistoriqueSemestreEtudiant> HistoriqueSemestreEtudiants { get; set; }= new List<HistoriqueSemestreEtudiant>();

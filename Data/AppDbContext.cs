@@ -8,7 +8,7 @@ namespace SystemeNote.Data
         public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
         {
         }
-        // Define your DbSets here, for example:
+
         public DbSet<Diplome> Diplomes { get; set; }
         public DbSet<Promotion> Promotions { get; set; }
         public DbSet<Etudiant> Etudiants { get; set; }
@@ -26,6 +26,9 @@ namespace SystemeNote.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            modelBuilder.Entity<Etudiant>()
+                .ToTable(tb => tb.HasTrigger("trg_etudiant_planifsemestre_history"));
 
             modelBuilder.Entity<Etudiant>()
                 .HasOne(e => e.PlanifSemestre)
@@ -51,7 +54,6 @@ namespace SystemeNote.Data
                 .HasForeignKey(h => h.EtudiantId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Ensure other relationships use Restrict to avoid multiple cascade paths on SQL Server
             modelBuilder.Entity<NoteEtudiant>()
                 .HasOne(n => n.Etudiant)
                 .WithMany(e => e.NoteEtudiants)
@@ -106,14 +108,11 @@ namespace SystemeNote.Data
                 .HasForeignKey(p => p.PromotionId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-
             modelBuilder.Entity<NoteEtudiant>()
                 .HasOne(n => n.ParcoursEtude)
                 .WithMany(p => p.NoteEtudiants)
                 .HasForeignKey(n => n.ParcoursEtudiantId)
                 .OnDelete(DeleteBehavior.Restrict);
         }
-
-
     }
 }

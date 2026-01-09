@@ -7,10 +7,21 @@
 
 <div class="d-sm-flex align-items-center justify-content-between mb-4">
     <h1 class="h3 mb-0 text-gray-800">@ViewData["Title"]</h1>
-    @if (!string.IsNullOrWhiteSpace(Model.Dashboard.NomPlanifSemestreActuel))
-    {
-        <span class="text-muted small">Planification actuelle: @Model.Dashboard.NomPlanifSemestreActuel</span>
-    }
+
+    <form method="get" class="d-flex align-items-center gap-2">
+        <select name="PlanifSemestreId" class="form-control form-control-sm" style="min-width: 260px;">
+            @foreach (var item in Model.PlanifSemestreOptions)
+            {
+                <option value="@item.Value" selected="@(item.Value == Model.PlanifSemestreId?.ToString())">
+                    @item.Text
+                </option>
+            }
+        </select>
+
+        <button type="submit" class="btn btn-sm btn-primary">
+            Voir
+        </button>
+    </form> 
 </div>
 
 <div class="row">

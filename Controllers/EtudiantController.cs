@@ -216,6 +216,7 @@ namespace SystemeNote.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(etudiant);
+
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }

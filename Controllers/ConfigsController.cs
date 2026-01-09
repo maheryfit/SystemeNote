@@ -11,8 +11,44 @@ namespace SystemeNote.Controllers
         private readonly AppDbContext _context;
         public ConfigsController(AppDbContext context) { _context = context; }
 
-        public async Task<IActionResult> Index() => View(await _context.Configs.ToListAsync());
+        public async Task<IActionResult> Index(string sortOrder, string searchString, int? pageNumber)
+        {
+            ViewData["CurrentSort"] = sortOrder;
+            ViewData["ValeurSortParm"] = String.IsNullOrEmpty(sortOrder) ? "valeur_desc" : "";
+            ViewData["DescriptionSortParm"] = sortOrder == "description" ? "description_desc" : "description";
 
+            ViewData["CurrentFilter"] = searchString;
+            ViewData["Title"] = "Liste des Configurations";
+
+            var configs = from c in _context.Configs
+                          select c;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                configs = configs.Where(c =>
+                    c.Valeur.Contains(searchString) ||
+                    (c.Description != null && c.Description.Contains(searchString)));
+            }
+
+            switch (sortOrder)
+            {
+                case "valeur_desc":
+                    configs = configs.OrderByDescending(c => c.Valeur);
+                    break;
+                case "description":
+                    configs = configs.OrderBy(c => c.Description);
+                    break;
+                case "description_desc":
+                    configs = configs.OrderByDescending(c => c.Description);
+                    break;
+                default:
+                    configs = configs.OrderBy(c => c.Valeur);
+                    break;
+            }
+
+            int pageSize = 10;
+            return View(await PaginatedList<Config>.CreateAsync(configs.AsNoTracking(), pageNumber ?? 1, pageSize));
+        }
         public async Task<IActionResult> Details(int? id) { if (id == null) return NotFound(); var item = await _context.Configs.FirstOrDefaultAsync(m => m.Id == id); if (item == null) return NotFound(); return View(item); }
 
         public IActionResult Create() => View();
