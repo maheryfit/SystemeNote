@@ -9,7 +9,7 @@ namespace SystemeNote.ViewModels
         public int TotalUeAjournes { get; set; }
 
         // KPI: moyenne semestre actuel
-        public double? MoyenneSemestreActuel { get; set; }
+        public decimal? MoyenneSemestreActuel { get; set; }
 
         // Progression de moyenne: comparer dernière planif vs actuelle
         public double? MoyenneSemestrePrecedent { get; set; }
