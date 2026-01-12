@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -6,6 +7,8 @@ using SystemeNote.Models;
 
 namespace SystemeNote.Controllers
 {
+    [Authorize(Roles = "Administrateur")]
+
     public class HistoriqueSemestreEtudiantsController : Controller
     {
         private readonly AppDbContext _context;

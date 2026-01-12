@@ -1,14 +1,13 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 using SystemeNote.Data;
 using SystemeNote.Models;
 using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
+    [Authorize(Roles = "Administrateur")]
     public class UniteEnseignementsController : Controller
     {
         private readonly AppDbContext _context;

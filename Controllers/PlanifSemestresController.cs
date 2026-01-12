@@ -1,3 +1,4 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using SystemeNote.ViewModels; // Ajout de cette directive using pour les ViewMod
 
 namespace SystemeNote.Controllers
 {
+    [Authorize(Roles = "Administrateur")]
     public class PlanifSemestresController : Controller
     {
         private readonly AppDbContext _context;

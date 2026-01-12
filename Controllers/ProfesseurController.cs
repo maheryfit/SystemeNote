@@ -1,11 +1,12 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
-using SystemeNote.Models;
 using SystemeNote.ViewModels;
 
 namespace SystemeNote.Controllers
 {
+    [Authorize(Roles = "Administrateur")]
     public class ProfesseurController : Controller
     {
         private readonly AppDbContext _context;

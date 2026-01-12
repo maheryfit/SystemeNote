@@ -1,12 +1,14 @@
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
 using SystemeNote.Models;
 using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
+    [Authorize(Roles = "Administrateur")]
     public class SemestresController : Controller
     {
         private readonly AppDbContext _context;
