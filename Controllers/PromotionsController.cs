@@ -1,4 +1,5 @@
-        using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using SystemeNote.Data;
@@ -7,6 +8,7 @@ using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
+    [Authorize(Roles = "Administrateur")]
     public class PromotionsController : Controller
     {
         private readonly AppDbContext _context;
