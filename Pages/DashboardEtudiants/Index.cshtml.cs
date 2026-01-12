@@ -12,6 +12,7 @@ namespace SystemeNote.Pages.DashboardEtudiants
     public class IndexModel : PageModel
     {
         private readonly string _connectionString;
+        private readonly int NOTE_MIN = 10;
 
         public IndexModel(IConfiguration configuration)
         {
@@ -51,18 +52,83 @@ namespace SystemeNote.Pages.DashboardEtudiants
             var ues = await GetUesForEtudiantAsync(PlanifSemestreId);
             var listeNotes = await GetNotesForEtudiantAsync(EtudiantId.Value, PlanifSemestreId);
             var moyenneSemestreActuel = await GetMoyennesForEtudiantAsync(EtudiantId.Value, PlanifSemestreId);
-
+            var (totalAdmis, totalNonAdmis) = await GetTotalUeAdmisEtNonAdmis(EtudiantId.Value, PlanifSemestreId);
             Dashboard = new EtudiantDashboardViewModel
             {
                 NomPlanifSemestreActuel = await GetPlanifSemestreNameAsync(PlanifSemestreId),
-                TotalUeAdmis = 5,
-                TotalUeAjournes = 2,
+                TotalUeAdmis = totalAdmis,
+                TotalUeAjournes = totalNonAdmis,
                 MoyenneSemestreActuel = moyenneSemestreActuel,
                 MoyenneSemestrePrecedent = null,
                 EvolutionMoyenne = null,
                 BarLabels = ues.Select(x => x.Nom).ToList(),
                 BarValues = listeNotes
             };
+        }
+
+        private async Task<(int, int)> GetTotalUeAdmisEtNonAdmis (int etudiantId, int? planifSemestreId)
+        {
+            if (planifSemestreId is null)
+            {
+                return (0, 0);
+            }
+            const string sql = @"
+                WITH NotesUnion AS
+                (
+                    SELECT
+                        parc.unite_enseignement_id,
+                        CAST(0 AS int) AS note_max
+                    FROM parcours_etude parc
+                    WHERE parc.planif_semestre_id = @planifSemestreId
+
+                    UNION ALL
+
+                    SELECT
+                        pe.unite_enseignement_id,
+                        MAX(ne.note) AS note_max
+                    FROM note_etudiant ne
+                    INNER JOIN parcours_etude pe ON ne.parcours_etudiant_id = pe.id
+                    WHERE ne.etudiant_id = @etudiantId
+                      AND pe.planif_semestre_id = @planifSemestreId
+                    GROUP BY pe.unite_enseignement_id
+                ),
+                NoteEtudiant AS 
+                (
+                    SELECT
+                        unite_enseignement_id,
+                        MAX(note_max) AS note_max,
+                        CASE 
+                            WHEN MAX(note_max) >= (SELECT COALESCE(TRY_CAST(valeur AS int), @PassMark) FROM config WHERE description = 'PassMark')
+                            THEN 1
+                            ELSE 0      
+                        END AS is_admis
+                    FROM NotesUnion
+                    GROUP BY unite_enseignement_id
+                )
+                SELECT 
+                    COUNT(CASE WHEN is_admis = 1 THEN 1 END) AS total_admis,
+                    COUNT(CASE WHEN is_admis = 0 THEN 1 END) AS total_non_admis
+                FROM NoteEtudiant;
+            ";
+            await using (var connection = new SqlConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                await using (var command = new SqlCommand(sql, connection))
+                {
+                    command.Parameters.AddWithValue("@planifSemestreId", planifSemestreId.Value);
+                    command.Parameters.AddWithValue("@etudiantId", etudiantId);
+                    command.Parameters.AddWithValue("@PassMark", NOTE_MIN);
+
+                    await using var reader = await command.ExecuteReaderAsync();
+                    while (await reader.ReadAsync())
+                    {
+                        var totalAdmis = reader.GetInt32(0);
+                        var totalNonAdmis = reader.GetInt32(1);
+                        return (totalAdmis, totalNonAdmis); 
+                    }
+                }
+            }
+            return (0, 0);
         }
 
         private async Task<decimal> GetMoyennesForEtudiantAsync(int etudiantId, int? planifSemestreId)
