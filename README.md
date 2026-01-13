@@ -55,7 +55,7 @@ It covers the full flow from academic structure setup (diplomas, semesters, UEs,
 2. Write the user story (text)
 3. UI/UX analysis: derive final screens + describe the UI
 4. Database design: define tables and relations
-5. Task assignment (binôme)
+5. Task assignment (2 developers)
 6. Bootstrap solution template + push to GitHub
 7. Prepare the DigitalOcean Droplet (Docker + SQL Server + runner)
 8. Write the GitHub Actions YAML for automatic deployment on:
