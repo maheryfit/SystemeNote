@@ -7,7 +7,7 @@ using SystemeNote.Models;
 
 namespace SystemeNote.Controllers
 {
-    // [Authorize(Roles = "Administrateur")]
+    [Authorize(Roles = "Administrateur")]
 
     public class HistoriqueSemestreEtudiantsController : Controller
     {

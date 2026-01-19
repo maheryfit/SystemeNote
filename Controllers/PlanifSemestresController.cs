@@ -10,7 +10,7 @@ using SystemeNote.ViewModels; // Ajout de cette directive using pour les ViewMod
 
 namespace SystemeNote.Controllers
 {
-    // [Authorize(Roles = "Administrateur")]
+    [Authorize(Roles = "Administrateur")]
     public class PlanifSemestresController : Controller
     {
         private readonly AppDbContext _context;

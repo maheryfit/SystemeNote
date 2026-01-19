@@ -9,7 +9,7 @@ using SystemeNote.ViewModels;
 
 namespace SystemeNote.Controllers
 {
-    // [Authorize(Roles = "Administrateur")]
+    [Authorize(Roles = "Administrateur")]
     public class EtudiantController : Controller
     {
         private readonly AppDbContext _context;

@@ -9,7 +9,8 @@ using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
-    // [Authorize(Roles = "Administrateur")]
+    git checkout main
+
     public class UploadController : Controller
     {
         private readonly AppDbContext _context;

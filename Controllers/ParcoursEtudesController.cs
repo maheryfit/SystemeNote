@@ -8,7 +8,7 @@ using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
-    // [Authorize(Roles = "Administrateur")]
+    [Authorize(Roles = "Administrateur")]
     public class ParcoursEtudesController : Controller
     {
         private readonly AppDbContext _context;
