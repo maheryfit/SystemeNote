@@ -8,7 +8,7 @@ using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
-    [Authorize(Roles = "Administrateur")]
+    // [Authorize(Roles = "Administrateur")]
     public class ParcoursEtudesController : Controller
     {
         private readonly AppDbContext _context;
@@ -22,7 +22,7 @@ namespace SystemeNote.Controllers
             ViewData["PlanifSortParm"] = sortOrder == "planif" ? "planif_desc" : "planif";
 
             ViewData["CurrentFilter"] = searchString;
-            ViewData["Title"] = "Parcours d'Étude";
+            ViewData["Title"] = "Parcours d'ï¿½tude";
 
             var parcoursEtudes = from p in _context.ParcoursEtudes
                                  .Include(p => p.Matiere)

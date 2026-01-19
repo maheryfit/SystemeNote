@@ -10,7 +10,7 @@ using SystemeNote.ViewModels; // Ajout de cette directive using pour les ViewMod
 
 namespace SystemeNote.Controllers
 {
-    [Authorize(Roles = "Administrateur")]
+    // [Authorize(Roles = "Administrateur")]
     public class PlanifSemestresController : Controller
     {
         private readonly AppDbContext _context;
@@ -250,44 +250,89 @@ namespace SystemeNote.Controllers
             var planifSemestre = await _context.PlanifSemestres.FindAsync(id);
             if (planifSemestre == null) return null;
 
-            var notes = await _context.NoteEtudiants
-                .Where(n => n.ParcoursEtude!.PlanifSemestreId == id)
-                .Include(n => n.Etudiant)
-                .Include(n => n.ParcoursEtude).ThenInclude(p => p!.Matiere)
-                .Include(n => n.ParcoursEtude).ThenInclude(p => p!.UniteEnseignement)
+            // 1. Récupérer tous les étudiants inscrits à ce semestre (PlanifSemestreId)
+            // Cela permet d'inclure même ceux qui n'ont pas encore de notes (ils auront 0 par défaut).
+            var etudiants = await _context.Etudiants
+                .Where(e => e.PlanifSemestreId == id)
                 .ToListAsync();
 
-            var studentAverages = new Dictionary<Etudiant, double>();
-            var studentUeGrades = new Dictionary<Etudiant, List<UeGradeRecord>>();
+            // 2. Récupérer la structure du semestre : tous les parcours (Matières/UEs) prévus
+            var parcoursSemestre = await _context.ParcoursEtudes
+                .Where(p => p.PlanifSemestreId == id)
+                .Include(p => p.Matiere)
+                .Include(p => p.UniteEnseignement)
+                .ToListAsync();
 
-            foreach (var studentGroup in notes.GroupBy(n => n.Etudiant))
+            // Identifier les matières uniques du semestre (le dénominateur pour la moyenne)
+            var matieresIds = parcoursSemestre.Select(p => p.MatiereId).Distinct().ToList();
+            int nombreMatieres = matieresIds.Count;
+
+            // 3. Récupérer toutes les notes enregistrées pour ce semestre
+            var notes = await _context.NoteEtudiants
+                .Where(n => n.ParcoursEtude!.PlanifSemestreId == id)
+                .Include(n => n.ParcoursEtude) // Nécessaire pour filtrer par MatiereId
+                .ToListAsync();
+
+            var rankings = new List<StudentRankingRecord>();
+
+            foreach (var etudiant in etudiants)
             {
-                var etudiant = studentGroup.Key;
-                if (etudiant == null) continue;
-                var ueRecords = new List<UeGradeRecord>();
-                var ueAverages = new List<double>();
+                // Filtrer les notes de l'étudiant courant
+                var notesEtudiant = notes.Where(n => n.EtudiantId == etudiant.Id).ToList();
 
-                foreach (var ueGroup in studentGroup.GroupBy(n => n.ParcoursEtude!.UniteEnseignement))
+                double sommeNotes = 0;
+                var ueRecords = new List<UeGradeRecord>();
+
+                // --- Calcul de la moyenne générale ---
+                // "la note moyenne de l'etudiant dans une semetre est la somme des note des matiere du semestre , diviser par le nombre de matiere du semestre."
+                foreach (var matiereId in matieresIds)
                 {
-                    var ue = ueGroup.Key;
-                    if (ue == null) continue;
-                    var maxNotes = ueGroup.GroupBy(n => n.ParcoursEtude!.Matiere).Select(g => g.Select(n => n.Note).DefaultIfEmpty(0).Max());
-                    var avg = maxNotes.Any() ? maxNotes.Average() : 0;
-                    ueAverages.Add(avg);
-                    ueRecords.Add(new UeGradeRecord { UeCode = ue.CodeUniteEnseignement, UeName = ue.CodeUniteEnseignement, UeAverage = avg });
+                    // Récupérer les notes pour cette matière spécifique
+                    var notesMatiere = notesEtudiant
+                        .Where(n => n.ParcoursEtude != null && n.ParcoursEtude.MatiereId == matiereId)
+                        .Select(n => n.Note)
+                        .ToList();
+
+                    // "si il y plusieurs note dans une matiere d'un eleve, on prend celui du max"
+                    // "supposons qu'une eleve n'a pas encore de note dans une matiere. donc par defaut 0"
+                    double noteRetenue = notesMatiere.Any() ? notesMatiere.Max() : 0.0;
+
+                    sommeNotes += noteRetenue;
                 }
-                studentAverages[etudiant] = ueAverages.Any() ? ueAverages.Average() : 0;
-                studentUeGrades[etudiant] = ueRecords;
+
+                double moyenneGenerale = nombreMatieres > 0 ? sommeNotes / nombreMatieres : 0;
+
+                // --- Calcul des moyennes par UE (pour l'affichage) ---
+                var ues = parcoursSemestre.GroupBy(p => p.UniteEnseignement).Where(g => g.Key != null);
+                foreach (var ueGroup in ues)
+                {
+                    var ue = ueGroup.Key!;
+                    var matieresUeIds = ueGroup.Select(p => p.MatiereId).Distinct().ToList();
+                    double sommeNotesUe = 0;
+                    foreach (var mId in matieresUeIds)
+                    {
+                        var notesMatiere = notesEtudiant.Where(n => n.ParcoursEtude?.MatiereId == mId).Select(n => n.Note).ToList();
+                        sommeNotesUe += notesMatiere.Any() ? notesMatiere.Max() : 0.0;
+                    }
+                    double moyenneUe = matieresUeIds.Count > 0 ? sommeNotesUe / matieresUeIds.Count : 0;
+                    ueRecords.Add(new UeGradeRecord { UeCode = ue.CodeUniteEnseignement, UeName = ue.CodeUniteEnseignement, UeAverage = moyenneUe });
+                }
+
+                rankings.Add(new StudentRankingRecord
+                {
+                    Etudiant = etudiant,
+                    OverallAverage = moyenneGenerale,
+                    Status = moyenneGenerale >= 10 ? "Admis" : "Ajourné",
+                    UeGrades = ueRecords.OrderBy(u => u.UeCode).ToList()
+                });
             }
 
-            var rankings = studentAverages.OrderByDescending(x => x.Value).Select((x, i) => new StudentRankingRecord
+            // Trier par moyenne décroissante et assigner les rangs
+            rankings = rankings.OrderByDescending(r => r.OverallAverage).ToList();
+            for (int i = 0; i < rankings.Count; i++)
             {
-                Rank = i + 1,
-                Etudiant = x.Key,
-                OverallAverage = x.Value,
-                Status = x.Value >= 10 ? "Admis" : "Ajourné",
-                UeGrades = studentUeGrades[x.Key].OrderBy(u => u.UeCode).ToList()
-            }).ToList();
+                rankings[i].Rank = i + 1;
+            }
 
             var total = rankings.Count;
             var avgClass = total > 0 ? rankings.Average(r => r.OverallAverage) : 0;

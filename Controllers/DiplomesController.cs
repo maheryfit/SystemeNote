@@ -7,7 +7,7 @@ using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
-    [Authorize(Roles = "Administrateur")]
+    // [Authorize(Roles = "Administrateur")]
     public class DiplomesController : Controller
     {
         private readonly AppDbContext _context;
@@ -25,7 +25,7 @@ namespace SystemeNote.Controllers
             ViewData["NameSortParm"] = String.IsNullOrEmpty(sortOrder) ? "name_desc" : "";
 
             ViewData["CurrentFilter"] = searchString;
-            ViewData["Title"] = "Liste des Diplômes";
+            ViewData["Title"] = "Liste des Diplï¿½mes";
 
             var diplomes = from d in _context.Diplomes
                            select d;

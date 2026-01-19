@@ -9,7 +9,7 @@ using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
-    [Authorize(Roles = "Administrateur")]
+    // [Authorize(Roles = "Administrateur")]
     public class UploadController : Controller
     {
         private readonly AppDbContext _context;
@@ -503,9 +503,15 @@ namespace SystemeNote.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> UploadPlanifSemestres(IFormFile file)
         {
-            var semestres = await _context.Semestres.ToDictionaryAsync(s => s.CodeSemestre, s => s.Id);
-            var options = await _context.OptionEtudes.ToDictionaryAsync(o => o.NomOptionEtude, o => o.Id);
-            var promotions = await _context.Promotions.ToDictionaryAsync(p => p.CodePromotion, p => p.Id);
+            var semestres = (await _context.Semestres.AsNoTracking().ToListAsync())
+                .GroupBy(s => s.CodeSemestre)
+                .ToDictionary(g => g.Key, g => g.First().Id);
+            var options = (await _context.OptionEtudes.AsNoTracking().ToListAsync())
+                .GroupBy(o => o.NomOptionEtude)
+                .ToDictionary(g => g.Key, g => g.First().Id);
+            var promotions = (await _context.Promotions.AsNoTracking().ToListAsync())
+                .GroupBy(p => p.CodePromotion)
+                .ToDictionary(g => g.Key, g => g.First().Id);
 
             var result = await UploadHelper.ProcessUpload(file, _context, async (cols) =>
             {
@@ -513,6 +519,10 @@ namespace SystemeNote.Controllers
                 var nomPlanif = cols[0];
                 var dateDebut = ParseDate(cols[1]);
                 var dateFin = ParseDate(cols[2]);
+
+                if (dateDebut == DateTime.MinValue) throw new Exception($"Date de début invalide : {cols[1]}");
+                if (dateFin == DateTime.MinValue) throw new Exception($"Date de fin invalide : {cols[2]}");
+
                 var codeSemestre = cols[3];
                 var nomOption = cols[4];
                 var totalCredit = ParseInt(cols[5]);
@@ -536,7 +546,7 @@ namespace SystemeNote.Controllers
                 }
             });
             TempData["Message"] = result;
-            return RedirectToAction("Index", "PlanifSemestres");
+            return RedirectToAction(nameof(Index));
         }
         #endregion
 

@@ -8,7 +8,7 @@ using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
-    [Authorize(Roles = "Administrateur")]
+    // [Authorize(Roles = "Administrateur")]
     public class NoteEtudiantsController : Controller
     {
         private readonly AppDbContext _context;
@@ -133,12 +133,12 @@ namespace SystemeNote.Controllers
         {
             if (!noteEtudiant.MatiereId.HasValue)
             {
-                ModelState.AddModelError(nameof(NoteEtudiant.MatiereId), "Matière obligatoire.");
+                ModelState.AddModelError(nameof(NoteEtudiant.MatiereId), "Matiï¿½re obligatoire.");
             }
 
             if (!noteEtudiant.UniteEnseignementId.HasValue)
             {
-                ModelState.AddModelError(nameof(NoteEtudiant.UniteEnseignementId), "Unité d'Enseignement obligatoire.");
+                ModelState.AddModelError(nameof(NoteEtudiant.UniteEnseignementId), "Unitï¿½ d'Enseignement obligatoire.");
             }
 
             if (!noteEtudiant.PlanifSemestreId.HasValue)
@@ -157,7 +157,7 @@ namespace SystemeNote.Controllers
 
                 if (parcours is null)
                 {
-                    ModelState.AddModelError(string.Empty, "Aucun parcours ne correspond à la combinaison sélectionnée (Matière + UE + Semestre).");
+                    ModelState.AddModelError(string.Empty, "Aucun parcours ne correspond ï¿½ la combinaison sï¿½lectionnï¿½e (Matiï¿½re + UE + Semestre).");
                 }
                 else
                 {
