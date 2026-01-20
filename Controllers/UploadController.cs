@@ -9,8 +9,6 @@ using SystemeNote.Utils;
 
 namespace SystemeNote.Controllers
 {
-    git checkout main
-
     public class UploadController : Controller
     {
         private readonly AppDbContext _context;
