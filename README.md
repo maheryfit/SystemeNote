@@ -64,4 +64,3 @@ It covers the full flow from academic structure setup (diplomas, semesters, UEs,
 9. Start development
 
 ---
-
