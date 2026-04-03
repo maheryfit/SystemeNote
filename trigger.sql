@@ -68,3 +68,6 @@ DELETE FROM note_etudiant;
 DBCC CHECKIDENT ('note_etudiant', RESEED, 0);
 DELETE FROM etudiant;
 DBCC CHECKIDENT ('etudiant', RESEED, 0);
+
+INSERT INTO administrateur (nom_admin, prenom_admin) VALUES ('Dupont', 'Jean');
+INSERT INTO administrateur (nom_admin, prenom_admin) VALUES ('Martin', 'Sophie');

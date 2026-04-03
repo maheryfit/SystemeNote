@@ -1,0 +1,85 @@
+@using SystemeNote.Pages.DashboardEtudiants
+@model PdfReportViewModel
+@{
+    Layout = null; // Important: Le PDF ne doit pas hériter du layout principal
+}
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Relevé - @Model.NomPlanifSemestre</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+            font-size: 14px;
+        }
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        .table th,
+        .table td {
+            border: 1px solid #dee2e6;
+            padding: 8px;
+        }
+        .table th {
+            background-color: #f2f2f2;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 24px;
+        }
+        .info-box {
+            margin-bottom: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Relevé de notes</h1>
+    
+    <div class="info-box">
+        <p><strong>Matricule :</strong> @Model.Matricule</p>
+        <p><strong>Semestre / Planification :</strong> @Model.NomPlanifSemestre</p>
+    </div>
+
+    <h4>Résumé</h4>
+    <p>
+        <strong>UE Admis :</strong> @Model.TotalUeAdmis |
+        <strong>UE Ajournés :</strong> @Model.TotalUeAjournes |
+        <strong>Moyenne du semestre :</strong> @(Model.MoyenneSemestre.HasValue ? Model.MoyenneSemestre.Value.ToString("F2") : "N/A")
+    </p>
+
+    <h4>Détail des Unités d'Enseignement</h4>
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Unité d'Enseignement</th>
+                <th>Note</th>
+            </tr>
+        </thead>
+        <tbody>
+            @for (int i = 0; i < Model.Ues.Count; i++)
+            {
+                <tr>
+                    <td>@Model.Ues[i]</td>
+                    <td>
+                        @{
+                            var note = Model.Notes.Count > i ? Model.Notes[i] : 0.0;
+                            var style = note < 10 ? "color: red;" : "color: green;";
+                        }
+                        <strong style="@style">@note.ToString("F2")</strong>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</body>
+</html>

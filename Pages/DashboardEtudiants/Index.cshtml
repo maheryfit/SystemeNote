@@ -1,4 +1,4 @@
-﻿@page
+@page
 @model SystemeNote.Pages.DashboardEtudiants.IndexModel
 @using System.Text.Json
 @{
@@ -21,6 +21,13 @@
         <button type="submit" class="btn btn-sm btn-primary">
             Voir
         </button>
+
+        @if (Model.PlanifSemestreId.HasValue)
+        {
+            <a asp-page-handler="ExportPdf" asp-route-planifSemestreId="@Model.PlanifSemestreId" class="btn btn-sm btn-danger text-nowrap">
+                <i class="fas fa-file-pdf"></i> Télécharger PDF
+            </a>
+        }
     </form> 
 </div>
 

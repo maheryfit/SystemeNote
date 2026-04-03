@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.Data.SqlClient;
+using Rotativa.AspNetCore;
 using System.Security.Claims;
 using SystemeNote.ViewModels;
 
@@ -349,6 +350,56 @@ namespace SystemeNote.Pages.DashboardEtudiants
                 }
             }
         }
+
+        [Obsolete]
+        public async Task<IActionResult> OnGetExportPdfAsync(int planifSemestreId)
+        {
+            var idValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            int? etudiantId = int.TryParse(idValue, out var id) ? id : null;
+            var matricule = User.FindFirstValue(ClaimTypes.Name);
+
+            if (etudiantId is null)
+            {
+                return NotFound();
+            }
+
+            var ues = await GetUesForEtudiantAsync(planifSemestreId);
+            var listeNotes = await GetNotesForEtudiantAsync(etudiantId.Value, planifSemestreId);
+            var moyenneSemestreActuel = await GetMoyennesForEtudiantAsync(etudiantId.Value, planifSemestreId);
+            var (totalAdmis, totalNonAdmis) = await GetTotalUeAdmisEtNonAdmis(etudiantId.Value, planifSemestreId);
+            var nomPlanif = await GetPlanifSemestreNameAsync(planifSemestreId);
+
+            var viewModel = new PdfReportViewModel
+            {
+                Matricule = matricule,
+                NomPlanifSemestre = nomPlanif,
+                TotalUeAdmis = totalAdmis,
+                TotalUeAjournes = totalNonAdmis,
+                MoyenneSemestre = moyenneSemestreActuel,
+                Ues = ues.Select(u => u.Nom).ToList(),
+                Notes = listeNotes
+            };
+
+            string pdfName = $"Releve-{matricule}-{nomPlanif}-{DateTime.Now:yyyyMMdd}.pdf";
+            var pdfResult = new ViewAsPdf("~/Pages/DashboardEtudiants/_PdfReport.cshtml", viewModel)
+            {
+                FileName = pdfName,
+                WkhtmltopdfPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "Rotativa")
+            };
+
+            return pdfResult;
+        }
+    }
+
+    public class PdfReportViewModel
+    {
+        public string? Matricule { get; set; }
+        public string? NomPlanifSemestre { get; set; }
+        public int TotalUeAdmis { get; set; }
+        public int TotalUeAjournes { get; set; }
+        public decimal? MoyenneSemestre { get; set; }
+        public List<string> Ues { get; set; } = new();
+        public List<double> Notes { get; set; } = new();
     }
 }
 
